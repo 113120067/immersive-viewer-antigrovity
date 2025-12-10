@@ -61,13 +61,43 @@ function launchImmersiveReaderWithContent(content) {
             }]
         };
 
+        // Load saved user preferences
+        const savedPreferences = localStorage.getItem('immersive-reader-preferences');
+        const savedTranslationLang = localStorage.getItem('immersive-reader-translation-lang') || 'zh-Hant';
+        
         // Options for Immersive Reader
         const options = {
             onExit: function() {
                 console.log('Immersive Reader closed');
                 $('#status').html('<div class="alert alert-info">Immersive Reader closed. You can upload another file.</div>');
             },
-            uiZIndex: 2000
+            uiZIndex: 2000,
+            cookiePolicy: 1, // CookiePolicy.Enable
+            preferences: savedPreferences,
+            displayOptions: {
+                textSize: 20,
+                increaseSpacing: false
+            },
+            translationOptions: {
+                language: savedTranslationLang,
+                autoEnableWordTranslation: false,
+                autoEnableDocumentTranslation: false
+            },
+            onPreferencesChanged: (preferences) => {
+                localStorage.setItem('immersive-reader-preferences', preferences);
+                console.log('Immersive Reader preferences saved');
+                
+                // Try to extract and save translation language
+                try {
+                    const prefsObj = JSON.parse(preferences);
+                    if (prefsObj && prefsObj.translationLanguage) {
+                        localStorage.setItem('immersive-reader-translation-lang', prefsObj.translationLanguage);
+                        console.log('Translation language saved:', prefsObj.translationLanguage);
+                    }
+                } catch (e) {
+                    // Preferences string format may vary, ignore parse errors
+                }
+            }
         };
 
         // Launch Immersive Reader

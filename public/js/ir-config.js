@@ -9,11 +9,48 @@
  * @returns {Object} - Immersive Reader options
  */
 function getDefaultIROptions(customOptions = {}) {
+  // Load saved user preferences
+  const savedPreferences = typeof localStorage !== 'undefined' 
+    ? localStorage.getItem('immersive-reader-preferences') 
+    : null;
+  const savedTranslationLang = typeof localStorage !== 'undefined'
+    ? (localStorage.getItem('immersive-reader-translation-lang') || 'zh-Hant')
+    : 'zh-Hant';
+  
   const defaultOptions = {
     uiZIndex: 2000,
     uiLang: 'zh-Hant',  // Traditional Chinese (Taiwan) UI
+    cookiePolicy: 1,  // CookiePolicy.Enable - allows saving user preferences in cookies
     disableGrammar: false,  // Enable syllables, picture dictionary, parts of speech
-    disableTranslation: false  // Enable translation features
+    disableTranslation: false,  // Enable translation features
+    preferences: savedPreferences,
+    displayOptions: {
+      textSize: 20,
+      increaseSpacing: false
+    },
+    translationOptions: {
+      language: savedTranslationLang,
+      autoEnableWordTranslation: false,
+      autoEnableDocumentTranslation: false
+    },
+    onPreferencesChanged: (preferences) => {
+      // Save user preferences when they change
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('immersive-reader-preferences', preferences);
+        console.log('Immersive Reader preferences saved');
+        
+        // Try to extract and save translation language
+        try {
+          const prefsObj = JSON.parse(preferences);
+          if (prefsObj && prefsObj.translationLanguage) {
+            localStorage.setItem('immersive-reader-translation-lang', prefsObj.translationLanguage);
+            console.log('Translation language saved:', prefsObj.translationLanguage);
+          }
+        } catch (e) {
+          // Preferences string format may vary, ignore parse errors
+        }
+      }
+    }
   };
   
   return {

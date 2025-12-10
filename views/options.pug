@@ -135,7 +135,34 @@ script(type="text/javascript").
                     }]
                 };
 
-                let options = {};
+                // Load saved user preferences
+                const savedPreferences = localStorage.getItem('immersive-reader-preferences');
+                const savedTranslationLang = localStorage.getItem('immersive-reader-translation-lang') || 'zh-Hant';
+                
+                let options = {
+                    cookiePolicy: 1, // CookiePolicy.Enable
+                    preferences: savedPreferences,
+                    translationOptions: sampleId !== 'DisableTranslation' ? {
+                        language: savedTranslationLang,
+                        autoEnableWordTranslation: false,
+                        autoEnableDocumentTranslation: false
+                    } : undefined,
+                    onPreferencesChanged: (preferences) => {
+                        localStorage.setItem('immersive-reader-preferences', preferences);
+                        console.log('Immersive Reader preferences saved');
+                        
+                        // Try to extract and save translation language
+                        try {
+                            const prefsObj = JSON.parse(preferences);
+                            if (prefsObj && prefsObj.translationLanguage) {
+                                localStorage.setItem('immersive-reader-translation-lang', prefsObj.translationLanguage);
+                                console.log('Translation language saved:', prefsObj.translationLanguage);
+                            }
+                        } catch (e) {
+                            // Preferences string format may vary, ignore parse errors
+                        }
+                    }
+                };
 
                 options.disableLanguageDetection = sampleId === 'DisableLanguageDetection';
                 options.disableGrammar = sampleId === 'DisableGrammar';

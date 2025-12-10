@@ -65,10 +65,40 @@ script(type="text/javascript").
                         mimeType: "text/html"
                     }]
                 };
+                // Load saved user preferences
+                const savedPreferences = localStorage.getItem('immersive-reader-preferences');
+                const savedTranslationLang = localStorage.getItem('immersive-reader-translation-lang') || 'zh-Hant';
+                
                 // Learn more about options https://docs.microsoft.com/azure/cognitive-services/immersive-reader/reference#options
                 const options = {
                     "onExit": exitCallback,
-                    "uiZIndex": 2000
+                    "uiZIndex": 2000,
+                    "cookiePolicy": 1, // CookiePolicy.Enable
+                    "preferences": savedPreferences,
+                    "displayOptions": {
+                        "textSize": 20,
+                        "increaseSpacing": false
+                    },
+                    "translationOptions": {
+                        "language": savedTranslationLang,
+                        "autoEnableWordTranslation": false,
+                        "autoEnableDocumentTranslation": false
+                    },
+                    "onPreferencesChanged": (preferences) => {
+                        localStorage.setItem('immersive-reader-preferences', preferences);
+                        console.log('Immersive Reader preferences saved');
+                        
+                        // Try to extract and save translation language
+                        try {
+                            const prefsObj = JSON.parse(preferences);
+                            if (prefsObj && prefsObj.translationLanguage) {
+                                localStorage.setItem('immersive-reader-translation-lang', prefsObj.translationLanguage);
+                                console.log('Translation language saved:', prefsObj.translationLanguage);
+                            }
+                        } catch (e) {
+                            // Preferences string format may vary, ignore parse errors
+                        }
+                    }
                 };
                 ImmersiveReader.launchAsync(token, subdomain, data, options)
                     .catch(function (error) {
