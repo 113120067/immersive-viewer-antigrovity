@@ -12,6 +12,9 @@
       max-width: 900px;
       margin: 0 auto;
     }
+    nav { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd; }
+    nav a { margin-right: 16px; text-decoration: none; color: #0070f3; }
+    nav a:hover { text-decoration: underline; }
     h1 { margin-bottom: 8px; }
     .user-info { margin-bottom: 16px; font-size: 14px; color: #666; }
     button {
@@ -92,6 +95,15 @@
   </style>
 </head>
 <body>
+  <nav>
+    <a href="/">Home</a> |
+    <a href="/options">Options</a> |
+    <a href="/upload">Upload</a> |
+    <a href="/upload-vocab">Vocabulary</a> |
+    <a href="/classroom">Classroom</a> |
+    <a id="nav-login" href="/login.html">Login</a>
+    <a id="nav-notes" href="/notes.html" style="display:none;margin-left:8px;">My Notes</a>
+  </nav>
   <h1>我的筆記</h1>
   <div class="user-info" id="user-info">載入中...</div>
 

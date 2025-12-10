@@ -10,9 +10,9 @@ nav
   // client-side auth toggle for navbar links
   script(type='module').
     import { initialize, onAuthStateChanged } from '/firebase-client.js';
-    (async () =&gt; {
+    (async () => {
       try { await initialize(); } catch(e) { /* ignore if not configured */ }
-      onAuthStateChanged(user =&gt; {
+      onAuthStateChanged(user => {
         const loginEl = document.getElementById('nav-login');
         const notesEl = document.getElementById('nav-notes');
         if (user) {
