@@ -1,0 +1,42 @@
+extends layout
+
+block content
+  div.container
+    include partials/navbar
+    
+    h1 Upload and Save Vocabulary
+    p Upload a file (.txt, .docx, .pdf, .xlsx, .xls) to extract vocabulary words, select the ones you want to save, and build your personal vocabulary list.
+    
+    div#uploadSection.mb-4
+      h2 Step 1: Upload File
+      form#vocabUploadForm
+        div.form-group
+          label(for='vocabFile') Choose a file (.txt, .docx, .pdf, .xlsx, .xls):
+          input#vocabFile.form-control(type='file', name='file', accept='.txt,.docx,.pdf,.xlsx,.xls', required)
+        button.btn.btn-primary(type='submit') Upload and Extract Words
+      div#uploadStatus.mt-3
+    
+    div#wordSelectionSection.d-none.mb-4
+      h2 Step 2: Select Words to Save
+      div.mb-3
+        button#selectAll.btn.btn-sm.btn-secondary Select All
+        button#deselectAll.btn.btn-sm.btn-secondary.ml-2 Deselect All
+        span.ml-3#wordCount
+      div#wordList.border.p-3(style='max-height: 400px; overflow-y: auto;')
+      button#saveWords.btn.btn-success.mt-3 Save Selected Words
+      div#saveStatus.mt-3
+    
+    div#vocabListSection.mb-4
+      h2 Saved Vocabulary
+      button#refreshVocab.btn.btn-info.btn-sm Refresh List
+      button#reviewWords.btn.btn-primary.btn-sm.ml-2 Review with Immersive Reader
+      div#vocabDisplay.mt-3
+    
+    // Firestore user notes (shown when logged in)
+    div#userNotesSection.mb-4(style='display:none;')
+      h2 Your Notes (Firestore)
+      p.text-muted These are your personal notes stored in Firestore when you're logged in.
+      button#openNotesPage.btn.btn-secondary.btn-sm(type='button') Open Notes Page
+      div#userNotesContainer.mt-3
+  
+  script(type='module' src='/js/upload-vocab.js')
