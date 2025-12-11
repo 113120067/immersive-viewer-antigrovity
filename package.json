@@ -6,6 +6,8 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@azure/cognitiveservices-computervision": "^8.2.0",
+    "@azure/ms-rest-azure-js": "^2.1.0",
     "axios": "^1.8.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
