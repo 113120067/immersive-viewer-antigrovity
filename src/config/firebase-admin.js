@@ -21,7 +21,9 @@ function initializeFirebaseAdmin() {
   const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
 
   if (!serviceAccount) {
-    console.warn('[Firebase Admin] FIREBASE_SERVICE_ACCOUNT not configured. Firestore features will be disabled.');
+    console.warn('⚠️ Warning: FIREBASE_SERVICE_ACCOUNT environment variable not set');
+    console.warn('⚠️ Firestore features requiring Admin SDK will not work');
+    console.warn('⚠️ Set FIREBASE_SERVICE_ACCOUNT to enable cloud storage features');
     return { admin: null, db: null };
   }
 
@@ -34,12 +36,17 @@ function initializeFirebaseAdmin() {
         const serviceAccountObj = JSON.parse(serviceAccount);
         credential = admin.credential.cert(serviceAccountObj);
       } catch (parseError) {
-        console.error('[Firebase Admin] Failed to parse service account JSON:', parseError.message);
-        throw new Error('Invalid service account JSON format');
+        console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', parseError.message);
+        return { admin: null, db: null };
       }
     } else {
       // Treat as file path
-      credential = admin.credential.cert(serviceAccount);
+      try {
+        credential = admin.credential.cert(serviceAccount);
+      } catch (fileError) {
+        console.error('❌ Failed to load service account file:', fileError.message);
+        return { admin: null, db: null };
+      }
     }
 
     admin.initializeApp({
@@ -49,11 +56,10 @@ function initializeFirebaseAdmin() {
     db = admin.firestore();
     initialized = true;
 
-    console.log('[Firebase Admin] Successfully initialized');
+    console.log('✅ Firebase Admin SDK initialized successfully');
     return { admin, db };
   } catch (error) {
-    console.error('[Firebase Admin] Failed to initialize:', error.message);
-    console.warn('[Firebase Admin] Firestore features will be disabled.');
+    console.error('❌ Firebase Admin SDK initialization failed:', error.message);
     return { admin: null, db: null };
   }
 }

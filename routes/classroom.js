@@ -339,8 +339,23 @@ router.get('/progress/:classroomId', (req, res) => {
 /**
  * GET /classroom/api/my-classrooms - Get user's owned classrooms
  */
-router.get('/api/my-classrooms', verifyIdToken(), async (req, res) => {
+router.get('/api/my-classrooms', verifyIdToken({ optional: true }), async (req, res) => {
   try {
+    if (!firestoreService.isAvailable()) {
+      return res.json({ 
+        success: true, 
+        classrooms: [],
+        warning: 'Firestore not initialized. Please set FIREBASE_SERVICE_ACCOUNT.'
+      });
+    }
+    
+    if (!req.user) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Authentication required' 
+      });
+    }
+    
     const classrooms = await firestoreService.getMyClassrooms(req.user.uid);
     res.json({ success: true, classrooms });
   } catch (error) {
@@ -352,8 +367,23 @@ router.get('/api/my-classrooms', verifyIdToken(), async (req, res) => {
 /**
  * GET /classroom/api/my-participations - Get user's participated classrooms
  */
-router.get('/api/my-participations', verifyIdToken(), async (req, res) => {
+router.get('/api/my-participations', verifyIdToken({ optional: true }), async (req, res) => {
   try {
+    if (!firestoreService.isAvailable()) {
+      return res.json({ 
+        success: true, 
+        participations: [],
+        warning: 'Firestore not initialized. Please set FIREBASE_SERVICE_ACCOUNT.'
+      });
+    }
+    
+    if (!req.user) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Authentication required' 
+      });
+    }
+    
     const participations = await firestoreService.getMyParticipations(req.user.uid);
     res.json({ success: true, participations });
   } catch (error) {

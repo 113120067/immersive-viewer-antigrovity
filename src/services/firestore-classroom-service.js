@@ -7,6 +7,14 @@ const { db } = require('../config/firebase-admin');
 const admin = require('firebase-admin');
 
 /**
+ * Check if Firestore is available
+ * @returns {boolean} - True if Firestore is initialized
+ */
+function isAvailable() {
+  return db !== null;
+}
+
+/**
  * Generate a unique 4-character alphanumeric classroom code
  * @returns {Promise<string>} - Unique classroom code
  */
@@ -628,6 +636,7 @@ async function getStudentProgress({ classroomId, userId }) {
 }
 
 module.exports = {
+  isAvailable,
   generateUniqueCode,
   createClassroom,
   getClassroomByCode,
