@@ -15,15 +15,19 @@ async function generateUniqueCode() {
 
   const crypto = require('crypto');
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const charsLength = chars.length;
   let attempts = 0;
   const maxAttempts = 10;
 
   while (attempts < maxAttempts) {
     let code = '';
-    // Use crypto.randomBytes for cryptographically secure random generation
-    const randomBytes = crypto.randomBytes(4);
+    // Generate code using rejection sampling to avoid modulo bias
     for (let i = 0; i < 4; i++) {
-      code += chars.charAt(randomBytes[i] % chars.length);
+      let randomValue;
+      do {
+        randomValue = crypto.randomBytes(1)[0];
+      } while (randomValue >= 256 - (256 % charsLength));
+      code += chars.charAt(randomValue % charsLength);
     }
 
     // Check if code already exists
