@@ -45,4 +45,9 @@ router.get('/upload-vocab', function(req, res, next) {
   res.render('upload-vocab', { title: 'Upload and Save Vocabulary' });
 });
 
+/* GET vision-analyzer page */
+router.get('/vision-analyzer', function(req, res, next) {
+  res.render('vision-analyzer', { title: 'Azure Computer Vision Analyzer' });
+});
+
 module.exports = router;

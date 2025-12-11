@@ -32,6 +32,10 @@
     FIREBASE_SERVICE_ACCOUNT='{"type":"service_account",...}'
     # OR
     # FIREBASE_SERVICE_ACCOUNT=/path/to/serviceAccountKey.json
+    
+    # Azure Computer Vision (Optional, for OCR and image analysis)
+    AZURE_VISION_KEY={YOUR_AZURE_VISION_KEY}
+    AZURE_VISION_ENDPOINT={YOUR_AZURE_VISION_ENDPOINT}
     ```
 
 1. Run `npm start` (or `nodemon start` if you want to view changes you make after doing a browser refresh)
@@ -195,6 +199,82 @@ Response:
 ### Data Storage
 
 Vocabulary data is stored in `data/vocab-store.json`. This is a simple JSON file (no database required) suitable for testing. The file is created automatically when you save your first words.
+
+## Azure Computer Vision Feature
+
+The application includes Azure Computer Vision integration for **OCR text recognition** and **intelligent image analysis**.
+
+### Features
+
+- **OCR Text Recognition**: Extract text from images (supports Traditional Chinese and multiple languages)
+- **Smart Tags**: AI-generated tags describing image content
+- **Image Description**: Automated captions for images
+- **Object Detection**: Identify and locate objects in images
+- **Color Analysis**: Detect dominant colors and accent colors
+
+### Setup
+
+1. **Create Azure Computer Vision Resource**:
+   - Go to [Azure Portal](https://portal.azure.com/)
+   - Create a new "Computer Vision" resource
+   - Note the **Key** and **Endpoint** from the resource
+
+2. **Configure Environment Variables**:
+   ```text
+   AZURE_VISION_KEY=your_azure_vision_key
+   AZURE_VISION_ENDPOINT=https://your-resource-name.cognitiveservices.azure.com/
+   ```
+
+3. **Access the Feature**:
+   - Navigate to [http://localhost:3000/vision-analyzer](http://localhost:3000/vision-analyzer)
+   - Upload an image (JPEG, PNG, GIF, BMP, max 5MB)
+   - Choose "Complete Analysis" or "OCR Only"
+
+### API Endpoints
+
+**Upload and Analyze Image**
+```bash
+curl -X POST http://localhost:3000/vision/analyze \
+  -F "image=@test-image.jpg" \
+  -F "userId=user123"
+```
+
+**OCR Only**
+```bash
+curl -X POST http://localhost:3000/vision/ocr-only \
+  -F "image=@document.jpg"
+```
+
+**Get Analysis Result**
+```bash
+curl http://localhost:3000/vision/analysis/{analysisId}
+```
+
+**Search Analyses**
+```bash
+# Search by text in OCR results
+curl "http://localhost:3000/vision/search?userId=user123&query=書本&type=text"
+
+# Search by tags
+curl "http://localhost:3000/vision/search?userId=user123&query=book&type=tags"
+```
+
+### Data Storage
+
+Analysis results are stored in Firestore collection `vision-analysis` with the following structure:
+- `userId`: User identifier
+- `imageUrl`: Public URL of the uploaded image
+- `ocrText`: Extracted text
+- `tags`: AI-generated tags with confidence scores
+- `description`: Image captions
+- `objects`: Detected objects with bounding boxes
+- `colors`: Color analysis results
+
+### Security
+
+- Firestore security rules ensure users can only access their own analysis results
+- Image uploads are limited to 5MB
+- Only authenticated users can create analyses (when Firebase Auth is configured)
 
 ## License
 

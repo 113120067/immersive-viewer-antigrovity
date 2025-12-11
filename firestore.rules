@@ -45,5 +45,19 @@ service cloud.firestore {
         }
       }
     }
+    
+    // Vision Analysis collection
+    match /vision-analysis/{analysisId} {
+      // Allow authenticated users to create their own analyses
+      allow create: if request.auth != null 
+                    && request.resource.data.userId == request.auth.uid;
+      
+      // Only allow reading and updating own analyses
+      allow read, update: if request.auth != null 
+                          && resource.data.userId == request.auth.uid;
+      
+      // Do not allow deletion
+      allow delete: if false;
+    }
   }
 }
