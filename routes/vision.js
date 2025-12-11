@@ -11,7 +11,6 @@ const { admin, db } = require('../src/config/firebase-admin');
 
 // Configure multer for image uploads (5MB limit, images only)
 const IMAGE_SIZE_LIMIT = 5 * 1024 * 1024; // 5MB
-const multer = require('multer');
 
 const imageUpload = multer({
   storage: multer.memoryStorage(),
