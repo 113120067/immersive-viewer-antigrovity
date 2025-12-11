@@ -6,6 +6,10 @@
 const { ComputerVisionClient } = require('@azure/cognitiveservices-computervision');
 const { ApiKeyCredentials } = require('@azure/ms-rest-azure-js');
 
+// Configuration constants
+const MAX_RETRIES = 10;
+const POLLING_INTERVAL_MS = 1000;
+
 let visionClient = null;
 let initialized = false;
 
@@ -64,10 +68,9 @@ async function extractText(imageUrl) {
     // Poll for the result
     let result;
     let status;
-    let maxRetries = 10;
     let retryCount = 0;
 
-    while (retryCount < maxRetries) {
+    while (retryCount < MAX_RETRIES) {
       result = await client.getReadResult(operationId);
       status = result.status;
 
@@ -78,7 +81,7 @@ async function extractText(imageUrl) {
       }
 
       // Wait before polling again
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
       retryCount++;
     }
 

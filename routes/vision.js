@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { createMemoryUpload } = require('../src/config/multer-config');
+const multer = require('multer');
 const azureVision = require('../src/services/azureVision');
 const { admin, db } = require('../src/config/firebase-admin');
 
