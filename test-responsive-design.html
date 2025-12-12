@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>響應式設計測試</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+        }
+        
+        .device-frame {
+            border: 3px solid #333;
+            border-radius: 15px;
+            margin: 20px auto;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .mobile-frame {
+            width: 375px;
+            height: 667px;
+        }
+        
+        .tablet-frame {
+            width: 768px;
+            height: 1024px;
+        }
+        
+        .desktop-frame {
+            width: 1200px;
+            height: 800px;
+        }
+        
+        .device-content {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .device-label {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 5px 15px;
+            background: #333;
+            color: white;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .breakpoint-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .test-button {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h1 class="text-center my-4">📱 Kids Vocabulary 響應式設計測試</h1>
+        
+        <div class="test-section">
+            <h2>🎯 響應式斷點說明</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="breakpoint-info">
+                        <h5>📱 手機版 (< 576px)</h5>
+                        <ul class="feature-list">
+                            <li>✅ 單欄布局</li>
+                            <li>✅ 大型觸控按鈕</li>
+                            <li>✅ 簡化文字</li>
+                            <li>✅ 緊湊間距</li>
+                            <li>✅ 垂直堆疊</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="breakpoint-info">
+                        <h5>📟 平板版 (576px - 992px)</h5>
+                        <ul class="feature-list">
+                            <li>✅ 兩欄布局</li>
+                            <li>✅ 中等按鈕大小</li>
+                            <li>✅ 適中文字</li>
+                            <li>✅ 平衡間距</li>
+                            <li>✅ 混合布局</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="breakpoint-info">
+                        <h5>🖥️ 桌面版 (≥ 992px)</h5>
+                        <ul class="feature-list">
+                            <li>✅ 多欄布局</li>
+                            <li>✅ 標準按鈕</li>
+                            <li>✅ 完整文字</li>
+                            <li>✅ 寬鬆間距</li>
+                            <li>✅ 水平排列</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 測試工具</h2>
+            <p>點擊以下按鈕在不同設備框架中測試 Kids Vocabulary：</p>
+            <div class="text-center">
+                <button class="test-button" onclick="showDevice('mobile')">📱 手機測試</button>
+                <button class="test-button" onclick="showDevice('tablet')">📟 平板測試</button>
+                <button class="test-button" onclick="showDevice('desktop')">🖥️ 桌面測試</button>
+                <button class="test-button" onclick="showAll()">👁️ 全部顯示</button>
+                <button class="test-button" onclick="openNewWindow()">🔗 新視窗測試</button>
+            </div>
+        </div>
+
+        <!-- 手機框架 -->
+        <div id="mobileFrame" class="device-frame mobile-frame" style="display: none;">
+            <div class="text-center">
+                <span class="device-label">📱 iPhone (375x667)</span>
+            </div>
+            <iframe class="device-content" src="/kids-vocabulary"></iframe>
+        </div>
+
+        <!-- 平板框架 -->
+        <div id="tabletFrame" class="device-frame tablet-frame" style="display: none;">
+            <div class="text-center">
+                <span class="device-label">📟 iPad (768x1024)</span>
+            </div>
+            <iframe class="device-content" src="/kids-vocabulary"></iframe>
+        </div>
+
+        <!-- 桌面框架 -->
+        <div id="desktopFrame" class="device-frame desktop-frame" style="display: none;">
+            <div class="text-center">
+                <span class="device-label">🖥️ Desktop (1200x800)</span>
+            </div>
+            <iframe class="device-content" src="/kids-vocabulary"></iframe>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 測試檢查清單</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>📱 手機版檢查</h5>
+                    <ul>
+                        <li>□ 輸入框大小適中</li>
+                        <li>□ 按鈕易於點擊</li>
+                        <li>□ 文字清晰可讀</li>
+                        <li>□ 圖片適當縮放</li>
+                        <li>□ 滑桿易於操作</li>
+                        <li>□ 垂直滾動順暢</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>🖥️ 桌面版檢查</h5>
+                    <ul>
+                        <li>□ 布局美觀平衡</li>
+                        <li>□ 空間利用充分</li>
+                        <li>□ 滑鼠操作流暢</li>
+                        <li>□ 懸停效果正常</li>
+                        <li>□ 文字大小適當</li>
+                        <li>□ 功能完整可用</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎨 設計特色</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <h6>🎯 適應性布局</h6>
+                    <p>使用 Bootstrap 響應式網格系統，在不同螢幕尺寸下自動調整布局結構。</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>👆 觸控優化</h6>
+                    <p>針對觸控設備優化按鈕大小和間距，確保良好的觸控體驗。</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>📐 彈性元素</h6>
+                    <p>文字大小、圖片尺寸、間距等元素根據螢幕大小動態調整。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDevice(device) {
+            // 隱藏所有框架
+            document.getElementById('mobileFrame').style.display = 'none';
+            document.getElementById('tabletFrame').style.display = 'none';
+            document.getElementById('desktopFrame').style.display = 'none';
+            
+            // 顯示指定框架
+            document.getElementById(device + 'Frame').style.display = 'block';
+            
+            // 滾動到框架位置
+            document.getElementById(device + 'Frame').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+        
+        function showAll() {
+            document.getElementById('mobileFrame').style.display = 'block';
+            document.getElementById('tabletFrame').style.display = 'block';
+            document.getElementById('desktopFrame').style.display = 'block';
+        }
+        
+        function openNewWindow() {
+            window.open('/kids-vocabulary', '_blank', 'width=800,height=600');
+        }
+        
+        // 頁面載入時的說明
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 響應式設計測試頁面載入完成');
+            
+            // 顯示當前螢幕尺寸
+            const width = window.innerWidth;
+            let deviceType = '';
+            
+            if (width < 576) {
+                deviceType = '📱 手機';
+            } else if (width < 992) {
+                deviceType = '📟 平板';
+            } else {
+                deviceType = '🖥️ 桌面';
+            }
+            
+            console.log(`當前螢幕: ${width}px (${deviceType})`);
+        });
+        
+        // 監聽螢幕尺寸變化
+        window.addEventListener('resize', function() {
+            const width = window.innerWidth;
+            console.log(`螢幕尺寸變更: ${width}px`);
+        });
+    </script>
+</body>
+</html>

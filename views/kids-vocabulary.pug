@@ -1,61 +1,69 @@
 extends layout
 
 block content
-  .container.mt-4
-    .row.justify-content-center
-      .col-md-8
+  .container-fluid.px-2.px-md-3.mt-2.mt-md-4
+    .row.g-2.g-md-3.justify-content-center
+      .col-12.col-lg-8.order-2.order-lg-1
         // 主要區域
-        .card.border-success.shadow
-          .card-header.bg-success.text-white.text-center
-            h3.mb-0 
+        .card.border-success.shadow.h-100
+          .card-header.bg-success.text-white.text-center.py-2.py-md-3
+            h3.mb-0.fs-4.fs-md-3
               | 🌟 小學生英文學習圖片生成器 🌟
-            p.mb-0.small 輸入英文單字或句子，AI 幫你畫圖片！
+            p.mb-0.small.d-none.d-sm-block 輸入英文單字或句子，AI 幫你畫圖片！
           
-          .card-body.p-4
+          .card-body.p-2.p-md-4
             // 歡迎訊息
-            .alert.alert-success.text-center.mb-4#welcomeMessage
-              h5 
+            .alert.alert-success.text-center.mb-3.mb-md-4#welcomeMessage
+              h5.fs-5.fs-md-4
                 | 👋 歡迎小朋友！
-              p.mb-2 輸入英文單字或句子，我會幫你畫一張可愛的圖片來學習！
+              p.mb-2.small.mb-md-2 輸入英文單字或句子，我會幫你畫一張可愛的圖片來學習！
               p.mb-0.small.text-muted ✨ 完全免費使用，無需註冊登入
             
             // 簡單輸入表單
             form#simpleVocabForm
-              .mb-4
-                label.form-label.h5(for="wordInput") 
+              .mb-3.mb-md-4
+                label.form-label.h6.h5-md(for="wordInput") 
                   | 🔤 請輸入英文單字或句子：
                 .input-group.input-group-lg
                   input#wordInput.form-control.form-control-lg(
                     type="text" 
-                    placeholder="例如：apple, I am happy, good morning..."
-                    style="font-size: 18px;"
+                    placeholder="例如：apple, I am happy..."
                     required
                   )
-                  button#generateBtn.btn.btn-success.btn-lg(type="submit")
-                    i.fas.fa-magic
-                    |  生成圖片！
-                .form-text.mt-2
-                  | 💡 單字：apple, dog, smile, house, book
-                  br
-                  | 💬 句子：I am happy, good morning, I like cats
+                  button#generateBtn.btn.btn-success.btn-lg.px-2.px-md-3(type="submit")
+                    i.fas.fa-magic.d-none.d-sm-inline
+                    span.d-sm-none 🎨
+                    span.d-none.d-sm-inline  生成圖片！
+                    span.d-sm-none 生成
+                .form-text.mt-2.small
+                  .d-block.d-md-none
+                    | 💡 apple, dog, smile
+                    br
+                    | 💬 I am happy
+                  .d-none.d-md-block
+                    | 💡 單字：apple, dog, smile, house, book
+                    br
+                    | 💬 句子：I am happy, good morning, I like cats
               
               // 發音功能設定
-              .row.mt-3
-                .col-md-4
+              .row.mt-3.g-2.g-md-3
+                .col-12.col-sm-6.col-lg-4
                   .form-check.form-switch
                     input#pronunciationToggle.form-check-input(type="checkbox" checked)
-                    label.form-check-label(for="pronunciationToggle")
+                    label.form-check-label.small(for="pronunciationToggle")
                       | 🔊 自動發音
-                      small.text-muted.d-block 生成圖片後自動播放單字發音
+                      small.text-muted.d-block.d-lg-none 圖片後自動播放
+                      small.text-muted.d-none.d-lg-block 生成圖片後自動播放單字發音
                 
-                .col-md-4
+                .col-12.col-sm-6.col-lg-4
                   .form-check.form-switch
                     input#practiceToggle.form-check-input(type="checkbox")
-                    label.form-check-label(for="practiceToggle")
+                    label.form-check-label.small(for="practiceToggle")
                       | 🎤 練習發音
-                      small.text-muted.d-block 開啟語音識別練習功能
+                      small.text-muted.d-block.d-lg-none 語音識別練習
+                      small.text-muted.d-none.d-lg-block 開啟語音識別練習功能
                 
-                .col-md-4
+                .col-12.col-lg-4
                   label.form-label.small(for="speechSpeedSlider")
                     | 🎵 播放速度
                     span#speedValue.text-muted.ms-1 (正常)
@@ -78,98 +86,103 @@ block content
               input#includeTextCheck(type="hidden" value="true")
             
             // 生成狀態
-            .mt-4#generationStatus(style="display: none")
-              .alert.alert-primary.text-center
-                .spinner-border.text-primary.me-3
-                h5.d-inline 
+            .mt-3.mt-md-4#generationStatus(style="display: none")
+              .alert.alert-primary.text-center.py-2.py-md-3
+                .spinner-border.spinner-border-sm.text-primary.me-2.me-md-3
+                h6.h5-md.d-inline.mb-0
                   | 🎨 正在為你畫圖片...
-                p.mb-0.small 請稍等 10-20 秒
+                p.mb-0.small.d-none.d-sm-block 請稍等 10-20 秒
             
             // 錯誤訊息
             .mt-3#errorMessage(style="display: none")
-              .alert.alert-warning.text-center
+              .alert.alert-warning.text-center.py-2
                 i.fas.fa-exclamation-triangle.me-2
                 span#errorText
       
-      .col-md-4
+      .col-12.col-lg-4.order-1.order-lg-2
         // 結果區域
-        .card.border-primary.shadow
-          .card-header.bg-primary.text-white.text-center
-            h5.mb-0 
+        .card.border-primary.shadow.h-100
+          .card-header.bg-primary.text-white.text-center.py-2.py-md-3
+            h6.h5-md.mb-0
               | 🖼️ 你的圖片
-          .card-body.text-center
+          .card-body.text-center.p-2.p-md-3
             // 圖片顯示
             .image-result#imageResult(style="display: none")
-              .mb-3
-                img#generatedImage.img-fluid.rounded.shadow(style="max-width: 100%; border: 3px solid #28a745;")
+              .mb-2.mb-md-3
+                img#generatedImage.img-fluid.rounded.shadow(style="max-width: 100%; border: 2px solid #28a745;")
               
-              .word-info.bg-light.p-3.rounded.mb-3
-                h4.text-success.mb-1#wordTitle 單字
-                p.text-muted.mb-2#wordMeaning 意思
+              .word-info.bg-light.p-2.p-md-3.rounded.mb-2.mb-md-3
+                h5.h4-md.text-success.mb-1#wordTitle 單字
+                p.text-muted.mb-2.small#wordMeaning 意思
                 
                 // 發音控制按鈕
                 .pronunciation-controls.mt-2
-                  .row.g-2
+                  .row.g-1.g-md-2
                     .col-6
-                      button#pronounceBtn.btn.btn-primary.btn-sm.w-100(type="button")
-                        i.fas.fa-volume-up.me-1
-                        | 🔊 發音
+                      button#pronounceBtn.btn.btn-primary.btn-sm.w-100.py-1.py-md-2(type="button")
+                        i.fas.fa-volume-up.me-1.d-none.d-sm-inline
+                        span.d-sm-none 🔊
+                        span.d-none.d-sm-inline 發音
                     .col-6
-                      button#practiceBtn.btn.btn-warning.btn-sm.w-100(type="button" style="display: none")
-                        i.fas.fa-microphone.me-1
-                        | 🎤 練習
+                      button#practiceBtn.btn.btn-warning.btn-sm.w-100.py-1.py-md-2(type="button" style="display: none")
+                        i.fas.fa-microphone.me-1.d-none.d-sm-inline
+                        span.d-sm-none 🎤
+                        span.d-none.d-sm-inline 練習
                 
                 // 練習發音結果
                 .practice-result.mt-2#practiceResult(style="display: none")
-                  .alert.alert-info.small.mb-0
+                  .alert.alert-info.small.mb-0.py-1.py-md-2
                     .d-flex.align-items-center
                       .spinner-border.spinner-border-sm.me-2#practiceSpinner(style="display: none")
-                      span#practiceText 點擊麥克風開始練習發音...</span>
+                      span#practiceText.small 點擊麥克風開始練習發音...
               
-              .mb-3
+              .mb-2.mb-md-3
                 small.text-muted#aiProvider 
                   | 🤖 由 AI 生成
               
               .d-grid
-                a#downloadLink.btn.btn-outline-success(download="my-word-image.png")
-                  i.fas.fa-download.me-2
-                  | 下載圖片
+                a#downloadLink.btn.btn-outline-success.btn-sm(download="my-word-image.png")
+                  i.fas.fa-download.me-1.me-md-2
+                  span.d-none.d-sm-inline 下載圖片
+                  span.d-sm-none 下載
             
             // 佔位符
             .placeholder-content#placeholderContent
-              .text-center.text-muted.py-5
-                i.fas.fa-image.fa-4x.mb-3.text-light
-                h5 你的圖片會出現在這裡
+              .text-center.text-muted.py-3.py-md-5
+                i.fas.fa-image.fa-2x.fa-md-4x.mb-2.mb-md-3.text-light
+                h6.h5-md 你的圖片會出現在這裡
                 p.small 輸入單字後點擊「生成圖片」
         
         // 最近的內容
-        .card.mt-3.border-info
-          .card-header.bg-info.text-white.text-center
-            h6.mb-0 
+        .card.mt-2.mt-md-3.border-info
+          .card-header.bg-info.text-white.text-center.py-2
+            h6.mb-0.small
               | 📚 最近學過的內容
-          .card-body
+          .card-body.p-2.p-md-3
             .small#recentWords
-              p.text-muted.text-center 還沒有學過的內容
+              p.text-muted.text-center.mb-0 還沒有學過的內容
 
-  // 特殊樣式
+  // 響應式樣式
   style.
     body {
       background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      min-height: 100vh;
     }
     
     .card {
-      border-radius: 15px;
+      border-radius: 10px;
     }
     
     .card-header {
-      border-radius: 15px 15px 0 0 !important;
+      border-radius: 10px 10px 0 0 !important;
     }
     
     #wordInput {
-      border-radius: 25px;
-      border: 3px solid #28a745;
+      border-radius: 20px;
+      border: 2px solid #28a745;
       text-align: center;
       font-weight: bold;
+      font-size: 16px;
     }
     
     #wordInput:focus {
@@ -178,59 +191,166 @@ block content
     }
     
     #generateBtn {
-      border-radius: 25px;
+      border-radius: 20px;
       font-weight: bold;
-      min-width: 120px;
+      min-width: 80px;
+    }
+    
+    /* 手機版樣式 */
+    @media (max-width: 575.98px) {
+      .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      
+      .card {
+        border-radius: 8px;
+      }
+      
+      #wordInput {
+        font-size: 14px;
+        border-radius: 15px;
+      }
+      
+      #generateBtn {
+        border-radius: 15px;
+        min-width: 60px;
+        font-size: 14px;
+      }
+      
+      .form-check-label {
+        font-size: 14px;
+      }
+      
+      .recent-word-item {
+        padding: 6px;
+        font-size: 13px;
+      }
+    }
+    
+    /* 平板版樣式 */
+    @media (min-width: 576px) and (max-width: 991.98px) {
+      .card {
+        border-radius: 12px;
+      }
+      
+      #wordInput {
+        font-size: 17px;
+      }
+    }
+    
+    /* 桌面版樣式 */
+    @media (min-width: 992px) {
+      .card {
+        border-radius: 15px;
+      }
+      
+      #wordInput {
+        font-size: 18px;
+        border-radius: 25px;
+        border-width: 3px;
+      }
+      
+      #generateBtn {
+        border-radius: 25px;
+        min-width: 120px;
+      }
     }
     
     #generatedImage {
       transition: transform 0.3s ease;
+      max-height: 300px;
+      object-fit: contain;
     }
     
     #generatedImage:hover {
-      transform: scale(1.05);
+      transform: scale(1.02);
     }
     
     .placeholder-content {
-      border: 3px dashed #dee2e6;
-      border-radius: 15px;
+      border: 2px dashed #dee2e6;
+      border-radius: 10px;
       background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
                   linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
                   linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
                   linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      background-size: 15px 15px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      min-height: 200px;
     }
     
     .word-info {
       border: 2px solid #28a745;
-      border-radius: 10px;
+      border-radius: 8px;
     }
     
     .spinner-border {
-      width: 2rem;
-      height: 2rem;
+      width: 1.5rem;
+      height: 1.5rem;
     }
     
     .recent-word-item {
       background: #f8f9fa;
       border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 8px;
-      margin-bottom: 8px;
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin-bottom: 6px;
       cursor: pointer;
       transition: all 0.2s ease;
+      font-size: 14px;
     }
     
     .recent-word-item:hover {
       background: #e9ecef;
-      transform: translateY(-2px);
+      transform: translateY(-1px);
+    }
+    
+    /* 手機版圖片樣式 */
+    @media (max-width: 575.98px) {
+      #generatedImage {
+        max-height: 250px;
+        border-width: 1px !important;
+      }
+      
+      .placeholder-content {
+        border-width: 1px;
+        min-height: 150px;
+        background-size: 12px 12px;
+      }
+      
+      .word-info {
+        border-width: 1px;
+      }
+    }
+    
+    /* 桌面版圖片樣式 */
+    @media (min-width: 992px) {
+      #generatedImage {
+        max-height: 400px;
+      }
+      
+      .placeholder-content {
+        border-width: 3px;
+        border-radius: 15px;
+        background-size: 20px 20px;
+        min-height: 300px;
+      }
+      
+      .word-info {
+        border-radius: 10px;
+      }
+      
+      .recent-word-item {
+        padding: 8px;
+        border-radius: 8px;
+        font-size: 15px;
+      }
     }
     
     #speechSpeedSlider {
       background: linear-gradient(to right, #28a745 0%, #20c997 50%, #17a2b8 100%);
-      height: 8px;
-      border-radius: 5px;
+      height: 6px;
+      border-radius: 3px;
       outline: none;
       opacity: 0.8;
       transition: opacity 0.2s;
@@ -242,23 +362,80 @@ block content
     
     #speechSpeedSlider::-webkit-slider-thumb {
       appearance: none;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: #28a745;
       cursor: pointer;
       border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     
     #speechSpeedSlider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: #28a745;
       cursor: pointer;
       border: 2px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    /* 手機版滑桿樣式 */
+    @media (max-width: 575.98px) {
+      #speechSpeedSlider {
+        height: 8px;
+      }
+      
+      #speechSpeedSlider::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+      }
+      
+      #speechSpeedSlider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    /* 桌面版滑桿樣式 */
+    @media (min-width: 992px) {
+      #speechSpeedSlider {
+        height: 8px;
+        border-radius: 5px;
+      }
+      
+      #speechSpeedSlider::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+      }
+      
+      #speechSpeedSlider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    /* 觸控設備優化 */
+    @media (hover: none) and (pointer: coarse) {
+      .btn {
+        min-height: 44px;
+      }
+      
+      .form-check-input {
+        width: 1.5em;
+        height: 1.5em;
+      }
+      
+      #speechSpeedSlider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+      }
+      
+      #speechSpeedSlider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+      }
     }
 
 block scripts
