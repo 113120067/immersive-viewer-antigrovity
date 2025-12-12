@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Vocabulary 句子支援測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .test-button {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🌟 Kids Vocabulary 句子支援測試</h1>
+    
+    <div class="test-section">
+        <h2>📝 輸入驗證測試</h2>
+        <p>測試新的輸入驗證邏輯是否正確支援單字和句子</p>
+        
+        <div>
+            <label>測試輸入：</label>
+            <input type="text" id="testInput" class="test-input" placeholder="輸入要測試的內容...">
+            <button class="test-button" onclick="testValidation()">測試驗證</button>
+            <div id="validationResult" class="result"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎨 提示詞生成測試</h2>
+        <p>測試針對單字和句子生成不同的 AI 提示詞</p>
+        
+        <div>
+            <button class="test-button" onclick="testPrompts()">測試提示詞生成</button>
+            <div id="promptResult" class="result"></div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📖 意思描述測試</h2>
+        <p>測試單字和句子的意思描述功能</p>
+        
+        <div>
+            <button class="test-button" onclick="testMeanings()">測試意思描述</button>
+            <div id="meaningResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模擬 Kids Vocabulary 的核心函數
+        function validateInput(input) {
+            if (!input) {
+                return { valid: false, error: '請輸入英文單字或句子！' };
+            }
+            if (input.length > 100) {
+                return { valid: false, error: '輸入太長了！請輸入簡短的英文單字或句子。' };
+            }
+            if (!/^[a-zA-Z\s.,!?'-]+$/.test(input)) {
+                return { valid: false, error: '請只輸入英文字母和基本標點符號！' };
+            }
+            return { valid: true };
+        }
+
+        function generateKidsPrompt(input) {
+            const wordCount = input.trim().split(/\s+/).length;
+            if (wordCount === 1) {
+                return `cute cartoon ${input}`;
+            } else {
+                return `cute cartoon illustration of "${input}" for kids, colorful, simple, educational`;
+            }
+        }
+
+        function getSimpleMeaning(word) {
+            const meanings = {
+                'apple': '蘋果', 'cat': '貓', 'dog': '狗', 'book': '書',
+                'house': '房子', 'happy': '快樂的', 'sad': '傷心的'
+            };
+            return meanings[word.toLowerCase()] || '英文單字';
+        }
+
+        function getSentenceDescription(sentence) {
+            const lowerSentence = sentence.toLowerCase();
+            if (lowerSentence.includes('i am') || lowerSentence.includes("i'm")) {
+                return '自我介紹句型';
+            } else if (lowerSentence.includes('i like') || lowerSentence.includes('i love')) {
+                return '表達喜好句型';
+            } else if (lowerSentence.includes('good morning') || lowerSentence.includes('good afternoon')) {
+                return '問候句型';
+            } else if (lowerSentence.includes('what') || lowerSentence.includes('where')) {
+                return '疑問句句型';
+            } else {
+                return '英文句子';
+            }
+        }
+
+        function testValidation() {
+            const input = document.getElementById('testInput').value;
+            const result = validateInput(input);
+            const resultDiv = document.getElementById('validationResult');
+            
+            if (result.valid) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ 驗證通過！輸入："${input}" 是有效的。`;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 驗證失敗：${result.error}`;
+            }
+        }
+
+        function testPrompts() {
+            const testCases = [
+                'apple',
+                'dog',
+                'I am happy',
+                'good morning',
+                'I like cats',
+                'The cat is sleeping'
+            ];
+            
+            let html = '<h4>提示詞生成結果：</h4>';
+            testCases.forEach(input => {
+                const prompt = generateKidsPrompt(input);
+                const wordCount = input.trim().split(/\s+/).length;
+                const type = wordCount === 1 ? '單字' : '句子';
+                html += `<div><strong>${type}：</strong>"${input}" → <em>${prompt}</em></div>`;
+            });
+            
+            document.getElementById('promptResult').innerHTML = html;
+        }
+
+        function testMeanings() {
+            const testCases = [
+                { input: 'apple', type: 'word' },
+                { input: 'dog', type: 'word' },
+                { input: 'I am happy', type: 'sentence' },
+                { input: 'good morning', type: 'sentence' },
+                { input: 'I like cats', type: 'sentence' },
+                { input: 'What is your name?', type: 'sentence' }
+            ];
+            
+            let html = '<h4>意思描述結果：</h4>';
+            testCases.forEach(test => {
+                let meaning;
+                if (test.type === 'word') {
+                    meaning = getSimpleMeaning(test.input);
+                } else {
+                    meaning = getSentenceDescription(test.input);
+                }
+                html += `<div><strong>${test.input}</strong> → <em>${meaning}</em></div>`;
+            });
+            
+            document.getElementById('meaningResult').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

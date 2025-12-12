@@ -6,6 +6,10 @@ nav
   a(href='/classroom') Classroom | 
   a(href='/farm-game') 🎮 Farm Game | 
   a(href='/vision-analyzer') Vision AI | 
+  a#nav-image-generator(href='/image-generator', style='display:none;') 🎨 AI Images | 
+  a#nav-vocabulary-generator(href='/vocabulary-generator', style='display:none;') 📚 Vocabulary | 
+  a#nav-kids-vocabulary(href='/kids-vocabulary', style='display:none;') 🌟 Kids Words | 
+  a#nav-usage-stats(href='/usage-stats', style='display:none;') 📊 Usage Stats | 
   a#nav-my-classrooms(href='/classroom/my', style='display:none;') My Classrooms | 
   a#nav-login(href='/login.html') Login
   a#nav-notes(href='/notes.html', style='display:none;margin-left:8px;') My Notes
@@ -19,14 +23,26 @@ nav
         const loginEl = document.getElementById('nav-login');
         const notesEl = document.getElementById('nav-notes');
         const myClassroomsEl = document.getElementById('nav-my-classrooms');
+        const imageGeneratorEl = document.getElementById('nav-image-generator');
+        const vocabularyGeneratorEl = document.getElementById('nav-vocabulary-generator');
+        const kidsVocabularyEl = document.getElementById('nav-kids-vocabulary');
+        const usageStatsEl = document.getElementById('nav-usage-stats');
         if (user) {
           if (loginEl) loginEl.style.display = 'none';
           if (notesEl) notesEl.style.display = '';
           if (myClassroomsEl) myClassroomsEl.style.display = '';
+          if (imageGeneratorEl) imageGeneratorEl.style.display = '';
+          if (vocabularyGeneratorEl) vocabularyGeneratorEl.style.display = '';
+          if (kidsVocabularyEl) kidsVocabularyEl.style.display = '';
+          if (usageStatsEl) usageStatsEl.style.display = '';
         } else {
           if (loginEl) loginEl.style.display = '';
           if (notesEl) notesEl.style.display = 'none';
           if (myClassroomsEl) myClassroomsEl.style.display = 'none';
+          if (imageGeneratorEl) imageGeneratorEl.style.display = 'none';
+          if (vocabularyGeneratorEl) vocabularyGeneratorEl.style.display = 'none';
+          if (kidsVocabularyEl) kidsVocabularyEl.style.display = 'none';
+          if (usageStatsEl) usageStatsEl.style.display = 'none';
         }
       });
     })();

@@ -1,0 +1,193 @@
+extends layout
+
+block content
+  .container.mt-4
+    .row.justify-content-center
+      .col-md-10
+        .card
+          .card-header.bg-info.text-white
+            h4.mb-0 🔧 System Status & Provider Information
+          .card-body
+            // 認證狀態
+            .alert.alert-info#authStatus
+              strong 🔍 Checking authentication status...
+            
+            // 提供商狀態
+            .row
+              .col-md-6
+                .card.border-primary
+                  .card-header.bg-primary.text-white
+                    h6.mb-0 🔷 Azure OpenAI Status
+                  .card-body#azureStatus
+                    .spinner-border.spinner-border-sm
+                    |  Checking...
+              
+              .col-md-6
+                .card.border-success
+                  .card-header.bg-success.text-white
+                    h6.mb-0 🟢 Google Imagen Status
+                  .card-body#googleStatus
+                    .spinner-border.spinner-border-sm
+                    |  Checking...
+            
+            // 系統配置
+            .mt-4
+              h5 ⚙️ System Configuration
+              .card.bg-light
+                .card-body
+                  pre#systemConfig(style="font-size: 12px; max-height: 300px; overflow-y: auto")
+                    | Loading system configuration...
+            
+            // 測試按鈕
+            .mt-4
+              h5 🧪 Quick Tests
+              .d-grid.gap-2.d-md-flex
+                button#testAzureBtn.btn.btn-primary(disabled)
+                  | 🔷 Test Azure OpenAI
+                button#testGoogleBtn.btn.btn-success(disabled)
+                  | 🟢 Test Google Imagen
+                button#testAutoBtn.btn.btn-info(disabled)
+                  | 🤖 Test Auto Selection
+            
+            // 測試結果
+            .mt-4
+              h6 📋 Test Results:
+              .bg-white.p-3.border.rounded#testResults(style="font-family: monospace; font-size: 12px; max-height: 400px; overflow-y: auto; white-space: pre-wrap")
+                | No tests run yet...
+
+block scripts
+  script(type="module").
+    import { initialize, onAuthStateChanged } from '/firebase-client.js';
+    
+    let currentUser = null;
+    let testResults = [];
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      testResults.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+      document.getElementById('testResults').textContent = testResults.join('\n');
+      console.log(`[System Status] ${message}`);
+    }
+    
+    async function init() {
+      try {
+        await initialize();
+        
+        onAuthStateChanged(user => {
+          currentUser = user;
+          
+          if (user) {
+            document.getElementById('authStatus').innerHTML = 
+              `<strong>✅ Authenticated as: ${user.email}</strong>`;
+            document.getElementById('authStatus').className = 'alert alert-success';
+            
+            // 啟用測試按鈕
+            document.getElementById('testAzureBtn').disabled = false;
+            document.getElementById('testGoogleBtn').disabled = false;
+            document.getElementById('testAutoBtn').disabled = false;
+            
+            loadSystemStatus();
+            
+          } else {
+            document.getElementById('authStatus').innerHTML = 
+              '<strong>❌ Not authenticated. Please <a href="/login.html">login</a> first.</strong>';
+            document.getElementById('authStatus').className = 'alert alert-warning';
+          }
+        });
+        
+      } catch (error) {
+        log(`Initialization failed: ${error.message}`, 'error');
+      }
+    }
+    
+    async function loadSystemStatus() {
+      try {
+        const token = await currentUser.getIdToken();
+        
+        // 獲取系統配置
+        const configResponse = await fetch('/image-generator/config', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const configData = await configResponse.json();
+        
+        if (configData.success) {
+          document.getElementById('systemConfig').textContent = 
+            JSON.stringify(configData.config, null, 2);
+          
+          // 更新提供商狀態
+          updateProviderStatus(configData.config.providers);
+        }
+        
+      } catch (error) {
+        log(`Failed to load system status: ${error.message}`, 'error');
+      }
+    }
+    
+    function updateProviderStatus(providers) {
+      const azureStatus = document.getElementById('azureStatus');
+      const googleStatus = document.getElementById('googleStatus');
+      
+      const azureProvider = providers.find(p => p.name === 'azure-openai');
+      const googleProvider = providers.find(p => p.name === 'google-imagen');
+      
+      if (azureProvider) {
+        azureStatus.innerHTML = `
+          <div class="text-success">✅ Available</div>
+          <small>Display Name: ${azureProvider.displayName}</small><br>
+          <small>Capabilities: ${Object.keys(azureProvider.capabilities).length} features</small>
+        `;
+      } else {
+        azureStatus.innerHTML = '<div class="text-danger">❌ Not Available</div>';
+      }
+      
+      if (googleProvider) {
+        googleStatus.innerHTML = `
+          <div class="text-success">✅ Available</div>
+          <small>Display Name: ${googleProvider.displayName}</small><br>
+          <small>Capabilities: ${Object.keys(googleProvider.capabilities).length} features</small>
+        `;
+      } else {
+        googleStatus.innerHTML = '<div class="text-danger">❌ Not Available</div>';
+      }
+    }
+    
+    async function testProvider(provider) {
+      try {
+        log(`Testing ${provider} provider...`);
+        const token = await currentUser.getIdToken();
+        
+        const response = await fetch('/image-generator/generate', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            prompt: 'A simple test image of a red apple',
+            provider: provider === 'auto' ? null : provider
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          log(`✅ ${provider} test successful! Used provider: ${data.providerDisplayName}`, 'success');
+          log(`Image URL: ${data.imageUrl.substring(0, 50)}...`, 'info');
+        } else {
+          log(`❌ ${provider} test failed: ${data.error}`, 'error');
+        }
+        
+      } catch (error) {
+        log(`❌ ${provider} test error: ${error.message}`, 'error');
+      }
+    }
+    
+    // 事件監聽器
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('testAzureBtn').addEventListener('click', () => testProvider('azure-openai'));
+      document.getElementById('testGoogleBtn').addEventListener('click', () => testProvider('google-imagen'));
+      document.getElementById('testAutoBtn').addEventListener('click', () => testProvider('auto'));
+      
+      init();
+    });

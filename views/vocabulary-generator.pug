@@ -1,0 +1,279 @@
+extends layout
+
+block content
+  .container-fluid.mt-4
+    .row
+      .col-md-8
+        // 主要生成區域
+        .card
+          .card-header.bg-success.text-white
+            h4.mb-0 📚 English Vocabulary Image Generator
+          .card-body
+            // 使用者資訊
+            .alert.alert-info.mb-4#userInfo(style="display: none")
+              strong 👤 Welcome, <span id="userEmail">Loading...</span>
+              p.mb-0.small Create memorable images to help students learn English vocabulary.
+            
+            // API 狀態指示器
+            .alert.alert-light.mb-3#apiStatus(style="display: none")
+              .row.small
+                .col-md-6
+                  strong 🤖 Available AI Providers:
+                .col-md-6.text-end
+                  span#providerStatus Loading...
+            
+            // 單字輸入表單
+            form#vocabularyForm
+              .row
+                .col-md-6
+                  .mb-3
+                    label.form-label(for="wordInput") 
+                      strong 📝 English Word:
+                    input#wordInput.form-control(
+                      type="text" 
+                      placeholder="e.g., apple, running, beautiful"
+                      required
+                    )
+                    .form-text Enter the English word you want to create a learning image for
+                
+                .col-md-6
+                  .mb-3
+                    label.form-label(for="definitionInput") 
+                      strong 📖 Definition (Optional):
+                    input#definitionInput.form-control(
+                      type="text" 
+                      placeholder="e.g., a red fruit that grows on trees"
+                    )
+                    .form-text Help AI understand the specific meaning
+              
+              .row
+                .col-md-3
+                  .mb-3
+                    label.form-label(for="providerSelect") 🤖 AI Provider:
+                    select#providerSelect.form-select
+                      option(value="") Auto (Best Available)
+                      option(value="azure-openai") 🔷 Azure OpenAI DALL-E
+                      option(value="google-imagen") 🟢 Google Imagen
+                    .form-text Choose which AI to use
+                
+                .col-md-3
+                  .mb-3
+                    label.form-label(for="categorySelect") 📂 Word Type:
+                    select#categorySelect.form-select
+                      option(value="auto") Auto Detect
+                      option(value="noun") Noun (thing/person/place)
+                      option(value="verb") Verb (action)
+                      option(value="adjective") Adjective (description)
+                      option(value="abstract") Abstract Concept
+                
+                .col-md-3
+                  .mb-3
+                    label.form-label(for="styleSelect") 🎨 Image Style:
+                    select#styleSelect.form-select
+                      option(value="memory") Memory Aid (清晰教育風格)
+                      option(value="cartoon" selected) Cartoon (卡通風格)
+                      option(value="contextual") Real Context (真實情境)
+                      option(value="story") Story Scene (故事場景)
+                      option(value="conceptual") Concept Diagram (概念圖)
+                
+                .col-md-3
+                  .mb-3
+                    label.form-label(for="levelSelect") 🎯 Student Level:
+                    select#levelSelect.form-select
+                      option(value="beginner" selected) Beginner (初學者)
+                      option(value="intermediate") Intermediate (中級)
+                      option(value="advanced") Advanced (高級)
+              
+              .row
+                .col-md-6
+                  .mb-3
+                    label.form-label(for="techniqueSelect") 🧠 Memory Technique:
+                    select#techniqueSelect.form-select
+                      option(value="visual") Visual Impact (視覺衝擊)
+                      option(value="association") Association (聯想記憶)
+                      option(value="emotion") Emotional (情感記憶)
+                      option(value="story" selected) Story-based (故事記憶)
+                      option(value="contrast") Contrast (對比記憶)
+                
+                .col-md-6
+                  .mb-3
+                    .form-check.mt-4
+                      input#includeTextCheck.form-check-input(type="checkbox")
+                      label.form-check-label(for="includeTextCheck") 
+                        | 📝 Include word label in image
+              
+              // 快速設置按鈕
+              .mb-3
+                .row
+                  .col-md-6
+                    .small.text-muted Quick Settings:
+                    .btn-group.flex-wrap(role="group")
+                      button#resetDefaultBtn.btn.btn-outline-primary.btn-sm(type="button")
+                        | 🎯 Reset to Default
+                      button#kidFriendlyBtn.btn.btn-outline-success.btn-sm(type="button")
+                        | 👶 Kid Friendly
+                      button#advancedBtn.btn.btn-outline-warning.btn-sm(type="button")
+                        | 🎓 Advanced Mode
+                  
+                  .col-md-6
+                    .small.text-muted Quick Examples:
+                    .btn-group.flex-wrap(role="group")
+                      button.btn.btn-outline-secondary.btn-sm(type="button" data-word="apple" data-definition="a round red or green fruit") Apple
+                      button.btn.btn-outline-secondary.btn-sm(type="button" data-word="running" data-definition="moving quickly on foot") Running  
+                      button.btn.btn-outline-secondary.btn-sm(type="button" data-word="happy" data-definition="feeling joy and pleasure") Happy
+              
+              .d-grid
+                button#generateBtn.btn.btn-success.btn-lg(type="submit")
+                  i.fas.fa-magic
+                  |  Generate Learning Image
+            
+            // 生成狀態
+            .mt-4#generationStatus(style="display: none")
+              .alert.alert-info
+                .d-flex.align-items-center
+                  .spinner-border.spinner-border-sm.me-2
+                  span Creating your vocabulary learning image... This may take 10-30 seconds.
+            
+            // 錯誤訊息
+            .mt-3#errorMessage(style="display: none")
+              .alert.alert-danger
+                i.fas.fa-exclamation-triangle.me-2
+                span#errorText
+      
+      .col-md-4
+        // 結果和建議區域
+        .card
+          .card-header.bg-primary.text-white
+            h5.mb-0 🖼️ Learning Image
+          .card-body
+            // 圖片顯示區域
+            .image-result.mb-3#imageResult(style="display: none")
+              .text-center
+                img#generatedImage.img-fluid.rounded(style="max-width: 100%; height: auto")
+                .mt-2
+                  .word-info.p-2.bg-light.rounded
+                    h6.mb-1#wordTitle Word
+                    small.text-muted#wordDefinition Definition
+                .mt-2
+                  small.text-muted#promptUsed
+                .mt-2
+                  a#downloadLink.btn.btn-outline-primary.btn-sm(download="vocabulary-image.png")
+                    i.fas.fa-download.me-1
+                    | Download Image
+            
+            // 佔位符
+            .placeholder-content#placeholderContent
+              .text-center.text-muted.py-4
+                i.fas.fa-book-open.fa-3x.mb-3
+                p Your vocabulary learning image will appear here
+                small Try entering a word above!
+            
+            // 系統提示詞顯示
+            .prompt-display.mt-4#promptDisplay(style="display: none")
+              h6 🤖 AI Prompt Used
+              .small.bg-light.p-3.rounded.border#promptText
+                | The AI prompt will appear here...
+              .mt-2
+                button.btn.btn-outline-secondary.btn-sm#togglePrompt(type="button")
+                  | 👁️ Show/Hide Full Prompt
+            
+            // 學習建議
+            .learning-tips.mt-4
+              h6 💡 Learning Tips
+              .small.text-muted#learningTips
+                ul
+                  li Look at the image for 10-15 seconds
+                  li Say the word out loud while viewing
+                  li Create a sentence using the word
+                  li Review the image again after 1 hour
+
+        // 單字歷史
+        .card.mt-3
+          .card-header.bg-info.text-white
+            h6.mb-0 📋 Recent Words
+          .card-body
+            .small#wordHistory
+              p.text-muted No words generated yet
+
+  // 樣式
+  style.
+    .image-result img {
+      border: 2px solid #dee2e6;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .placeholder-content {
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+    }
+    
+    .word-info {
+      border: 1px solid #dee2e6;
+    }
+    
+    .learning-tips {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .btn-group .btn {
+      margin: 2px;
+    }
+    
+    #wordHistory {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .prompt-display {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #dee2e6;
+    }
+    
+    .prompt-analysis {
+      background-color: #e3f2fd;
+      padding: 10px;
+      border-radius: 5px;
+      border-left: 4px solid #2196f3;
+    }
+    
+    .prompt-breakdown .badge {
+      font-size: 10px;
+    }
+    
+    .bg-pink {
+      background-color: #e91e63 !important;
+    }
+    
+    .bg-purple {
+      background-color: #9c27b0 !important;
+    }
+    
+    #promptFull {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .provider-info {
+      background-color: #e8f5e8;
+      padding: 10px;
+      border-radius: 5px;
+      border-left: 4px solid #28a745;
+    }
+    
+    .provider-badge .badge {
+      font-size: 14px;
+    }
+
+block scripts
+  script(src="/js/vocabulary-generator.js" type="module")
+  script.
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📚 Vocabulary Generator page loaded');
+    });

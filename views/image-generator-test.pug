@@ -1,0 +1,159 @@
+extends layout
+
+block content
+  .container.mt-4
+    .row.justify-content-center
+      .col-md-8
+        .card
+          .card-header.bg-primary.text-white
+            h4.mb-0 🔧 Image Generator - Debug Mode
+          .card-body
+            // 認證狀態顯示
+            .alert.alert-info#authStatus
+              strong 🔍 Checking authentication status...
+            
+            // Firebase 狀態
+            .alert.alert-secondary#firebaseStatus
+              strong 🔥 Firebase Status: Loading...
+            
+            // 測試按鈕
+            .d-grid.gap-2
+              button#testAuthBtn.btn.btn-outline-primary(disabled)
+                i.fas.fa-user-check
+                |  Test Authentication
+              
+              button#testConfigBtn.btn.btn-outline-info(disabled)
+                i.fas.fa-cog
+                |  Test Config API
+              
+              button#testGenerateBtn.btn.btn-outline-success(disabled)
+                i.fas.fa-image
+                |  Test Generate API
+            
+            // 結果顯示
+            .mt-4
+              h6 📋 Test Results:
+              pre#testResults(style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-size: 12px; max-height: 400px; overflow-y: auto")
+
+block scripts
+  script(type="module").
+    import { initialize, onAuthStateChanged } from '/firebase-client.js';
+    
+    let currentUser = null;
+    let testResults = [];
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      testResults.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+      document.getElementById('testResults').textContent = testResults.join('\n');
+      console.log(`[ImageGen Debug] ${message}`);
+    }
+    
+    async function init() {
+      try {
+        log('Initializing Firebase...');
+        await initialize();
+        log('Firebase initialized successfully', 'success');
+        
+        document.getElementById('firebaseStatus').innerHTML = 
+          '<strong>🔥 Firebase Status: ✅ Initialized</strong>';
+        
+        onAuthStateChanged(user => {
+          currentUser = user;
+          
+          if (user) {
+            log(`User authenticated: ${user.email}`, 'success');
+            document.getElementById('authStatus').innerHTML = 
+              `<strong>✅ Authenticated as: ${user.email}</strong>`;
+            document.getElementById('authStatus').className = 'alert alert-success';
+            
+            // 啟用測試按鈕
+            document.getElementById('testAuthBtn').disabled = false;
+            document.getElementById('testConfigBtn').disabled = false;
+            document.getElementById('testGenerateBtn').disabled = false;
+            
+          } else {
+            log('User not authenticated', 'warning');
+            document.getElementById('authStatus').innerHTML = 
+              '<strong>❌ Not authenticated. Please <a href="/login.html">login</a> first.</strong>';
+            document.getElementById('authStatus').className = 'alert alert-warning';
+          }
+        });
+        
+      } catch (error) {
+        log(`Firebase initialization failed: ${error.message}`, 'error');
+        document.getElementById('firebaseStatus').innerHTML = 
+          '<strong>🔥 Firebase Status: ❌ Failed</strong>';
+        document.getElementById('firebaseStatus').className = 'alert alert-danger';
+      }
+    }
+    
+    async function getAuthToken() {
+      if (!currentUser) {
+        throw new Error('User not authenticated');
+      }
+      return await currentUser.getIdToken();
+    }
+    
+    async function testAuth() {
+      try {
+        log('Testing authentication...');
+        const token = await getAuthToken();
+        log(`Token obtained: ${token.substring(0, 20)}...`, 'success');
+      } catch (error) {
+        log(`Auth test failed: ${error.message}`, 'error');
+      }
+    }
+    
+    async function testConfig() {
+      try {
+        log('Testing config API...');
+        const token = await getAuthToken();
+        
+        const response = await fetch('/image-generator/config', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        const data = await response.json();
+        log(`Config API response: ${JSON.stringify(data, null, 2)}`, 'success');
+        
+      } catch (error) {
+        log(`Config test failed: ${error.message}`, 'error');
+      }
+    }
+    
+    async function testGenerate() {
+      try {
+        log('Testing generate API...');
+        const token = await getAuthToken();
+        
+        const response = await fetch('/image-generator/generate', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            prompt: 'A simple test image of a red apple'
+          })
+        });
+        
+        const data = await response.json();
+        log(`Generate API response: ${JSON.stringify(data, null, 2)}`, 
+            data.success ? 'success' : 'error');
+        
+      } catch (error) {
+        log(`Generate test failed: ${error.message}`, 'error');
+      }
+    }
+    
+    // 事件監聽器
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('testAuthBtn').addEventListener('click', testAuth);
+      document.getElementById('testConfigBtn').addEventListener('click', testConfig);
+      document.getElementById('testGenerateBtn').addEventListener('click', testGenerate);
+      
+      init();
+    });

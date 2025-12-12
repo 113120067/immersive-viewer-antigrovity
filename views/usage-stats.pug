@@ -1,0 +1,143 @@
+extends layout
+
+block content
+  .container.mt-4
+    .row
+      .col-md-8
+        // 使用統計卡片
+        .card.border-primary.shadow
+          .card-header.bg-primary.text-white
+            h4.mb-0 
+              i.fas.fa-chart-bar.me-2
+              | 使用量統計
+          .card-body
+            // 載入狀態
+            .text-center.py-4#loadingStats
+              .spinner-border.text-primary
+              p.mt-2 載入統計資料中...
+            
+            // 統計內容
+            .d-none#statsContent
+              // 今日使用量
+              .row.mb-4
+                .col-md-6
+                  .card.bg-light
+                    .card-body.text-center
+                      h5.text-primary 今日使用量
+                      h2.mb-1#todayCount 0
+                      small.text-muted / <span id="todayLimit">0</span> 張
+                      .progress.mt-2
+                        .progress-bar#todayProgress(role="progressbar" style="width: 0%")
+                .col-md-6
+                  .card.bg-light
+                    .card-body.text-center
+                      h5.text-success 今日費用
+                      h2.mb-1#todayCost $0.00
+                      small.text-muted / $<span id="todayCostLimit">0.00</span>
+                      .progress.mt-2
+                        .progress-bar.bg-success#todayCostProgress(role="progressbar" style="width: 0%")
+              
+              // 本月使用量
+              .row.mb-4
+                .col-md-6
+                  .card.bg-light
+                    .card-body.text-center
+                      h5.text-info 本月使用量
+                      h2.mb-1#monthlyCount 0
+                      small.text-muted / <span id="monthlyLimit">0</span> 張
+                      .progress.mt-2
+                        .progress-bar.bg-info#monthlyProgress(role="progressbar" style="width: 0%")
+                .col-md-6
+                  .card.bg-light
+                    .card-body.text-center
+                      h5.text-warning 本月費用
+                      h2.mb-1#monthlyCost $0.00
+                      small.text-muted / $<span id="monthlyCostLimit">0.00</span>
+                      .progress.mt-2
+                        .progress-bar.bg-warning#monthlyCostProgress(role="progressbar" style="width: 0%")
+              
+              // 使用狀態
+              .alert#usageAlert.d-none
+                .d-flex.align-items-center
+                  i.fas.fa-info-circle.me-2
+                  span#usageMessage
+      
+      .col-md-4
+        // 限制設定卡片
+        .card.border-warning.shadow
+          .card-header.bg-warning.text-dark
+            h5.mb-0 
+              i.fas.fa-cog.me-2
+              | 使用限制設定
+          .card-body
+            .small
+              h6.text-primary 每日限制
+              ul.list-unstyled.mb-3
+                li 個人: <strong id="dailyUserLimit">0</strong> 張圖片
+                li 系統: <strong id="dailyGlobalLimit">0</strong> 張圖片
+                li 費用: <strong>$<span id="dailyCostLimitDisplay">0.00</span></strong>
+              
+              h6.text-info 每月限制
+              ul.list-unstyled.mb-3
+                li 個人: <strong id="monthlyUserLimit">0</strong> 張圖片
+                li 系統: <strong id="monthlyGlobalLimit">0</strong> 張圖片
+                li 費用: <strong>$<span id="monthlyCostLimitDisplay">0.00</span></strong>
+              
+              h6.text-success 圖片成本
+              ul.list-unstyled.small
+                li Standard 1024x1024: <strong>$0.040</strong>
+                li Standard 1792x1024: <strong>$0.080</strong>
+                li HD 1024x1024: <strong>$0.080</strong>
+                li HD 1792x1024: <strong>$0.120</strong>
+        
+        // 系統狀態卡片
+        .card.border-info.shadow.mt-3
+          .card-header.bg-info.text-white
+            h6.mb-0 
+              i.fas.fa-server.me-2
+              | 系統狀態
+          .card-body
+            .d-none#globalStatsContent
+              .small
+                h6.text-primary 今日全系統
+                ul.list-unstyled.mb-2
+                  li 圖片數: <strong id="globalTodayCount">0</strong>
+                  li 費用: <strong>$<span id="globalTodayCost">0.00</span></strong>
+                
+                h6.text-info 本月全系統
+                ul.list-unstyled
+                  li 圖片數: <strong id="globalMonthlyCount">0</strong>
+                  li 費用: <strong>$<span id="globalMonthlyCost">0.00</span></strong>
+        
+        // 測試功能（僅開發環境）
+        .card.border-secondary.shadow.mt-3#testCard.d-none
+          .card-header.bg-secondary.text-white
+            h6.mb-0 
+              i.fas.fa-flask.me-2
+              | 測試功能
+          .card-body
+            .small
+              p.text-muted 僅開發環境可用
+              .d-grid.gap-2
+                button.btn.btn-sm.btn-outline-primary#simulateBtn 模擬生成 1 張圖片
+                button.btn.btn-sm.btn-outline-warning#simulate5Btn 模擬生成 5 張圖片
+
+  // 錯誤訊息
+  .modal.fade#errorModal(tabindex="-1")
+    .modal-dialog
+      .modal-content
+        .modal-header.bg-danger.text-white
+          h5.modal-title 錯誤
+          button.btn-close(data-bs-dismiss="modal")
+        .modal-body
+          p#errorMessage
+        .modal-footer
+          button.btn.btn-secondary(data-bs-dismiss="modal") 關閉
+
+block scripts
+  script(src="/js/usage-stats.js" type="module")
+  script.
+    // 頁面載入完成後初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📊 Usage Stats page loaded');
+    });

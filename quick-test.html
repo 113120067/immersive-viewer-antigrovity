@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Test - Dog Image</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        img { max-width: 400px; border: 3px solid #28a745; border-radius: 10px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🐕 Quick Test: Dog Image Loading</h1>
+    
+    <div id="status" class="status">載入中...</div>
+    
+    <img id="dogImage" 
+         src="https://image.pollinations.ai/prompt/cute%20cartoon%20dog%20for%20kids%2C%20colorful%2C%20simple%2C%20educational%2C%20children%20book%20style" 
+         alt="Cute Cartoon Dog">
+    
+    <p><strong>URL:</strong> <code>https://image.pollinations.ai/prompt/cute%20cartoon%20dog%20for%20kids%2C%20colorful%2C%20simple%2C%20educational%2C%20children%20book%20style</code></p>
+    <p><strong>URL Length:</strong> <span id="urlLength"></span> characters</p>
+
+    <script>
+        const img = document.getElementById('dogImage');
+        const status = document.getElementById('status');
+        const urlLength = document.getElementById('urlLength');
+        
+        urlLength.textContent = img.src.length;
+        
+        img.onload = function() {
+            status.textContent = '✅ 圖片載入成功！現在 Kids Vocabulary 應該可以正常工作了。';
+            status.className = 'status success';
+            console.log('✅ Dog image loaded successfully');
+        };
+        
+        img.onerror = function(error) {
+            status.textContent = '❌ 圖片載入失敗，可能需要等待 Pollinations 生成圖片。';
+            status.className = 'status error';
+            console.error('❌ Dog image failed to load:', error);
+        };
+        
+        // 10秒後如果還在載入，顯示提示
+        setTimeout(() => {
+            if (status.textContent === '載入中...') {
+                status.textContent = '⏰ 圖片生成中，請稍候...（Pollinations 可能需要幾秒鐘生成圖片）';
+                status.className = 'status error';
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

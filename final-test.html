@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Test - Multiple Fallback Strategy</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f8f9fa; }
+        .test-container { 
+            background: white; 
+            margin: 20px 0; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        img { max-width: 300px; border: 3px solid #28a745; border-radius: 10px; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #d1ecf1; color: #0c5460; }
+        .url-info { font-size: 12px; color: #666; margin: 5px 0; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Final Test - Multiple Fallback Strategy</h1>
+    
+    <div class="test-container">
+        <h3>測試 1: 原始複雜 URL</h3>
+        <div id="status1" class="status loading">載入中...</div>
+        <div class="url-info">URL: https://image.pollinations.ai/prompt/cute%20cartoon%20dog</div>
+        <img id="img1" alt="Test 1">
+    </div>
+    
+    <div class="test-container">
+        <h3>測試 2: 簡單 URL</h3>
+        <div id="status2" class="status loading">載入中...</div>
+        <div class="url-info">URL: https://image.pollinations.ai/prompt/dog</div>
+        <img id="img2" alt="Test 2">
+    </div>
+    
+    <div class="test-container">
+        <h3>測試 3: 多重備用策略模擬</h3>
+        <div id="status3" class="status loading">載入中...</div>
+        <div id="currentUrl3" class="url-info">準備測試...</div>
+        <img id="img3" alt="Test 3">
+    </div>
+
+    <script>
+        // 簡單測試
+        function setupSimpleTest(imgId, statusId, url) {
+            const img = document.getElementById(imgId);
+            const status = document.getElementById(statusId);
+            
+            img.onload = function() {
+                status.textContent = '✅ 圖片載入成功！';
+                status.className = 'status success';
+            };
+            
+            img.onerror = function() {
+                status.textContent = '❌ 圖片載入失敗';
+                status.className = 'status error';
+            };
+            
+            img.src = url;
+        }
+        
+        // 多重備用策略測試
+        function setupFallbackTest() {
+            const img = document.getElementById('img3');
+            const status = document.getElementById('status3');
+            const urlDisplay = document.getElementById('currentUrl3');
+            
+            const urls = [
+                'https://image.pollinations.ai/prompt/cute%20cartoon%20dog%20for%20kids',
+                'https://image.pollinations.ai/prompt/cute%20cartoon%20dog',
+                'https://image.pollinations.ai/prompt/dog'
+            ];
+            
+            let currentIndex = 0;
+            
+            function tryNextUrl() {
+                if (currentIndex >= urls.length) {
+                    status.textContent = '❌ 所有 URL 都失敗了';
+                    status.className = 'status error';
+                    urlDisplay.textContent = '所有備用方案都已嘗試';
+                    return;
+                }
+                
+                const currentUrl = urls[currentIndex];
+                urlDisplay.textContent = `嘗試 URL ${currentIndex + 1}/${urls.length}: ${currentUrl}`;
+                status.textContent = `載入中... (嘗試 ${currentIndex + 1}/${urls.length})`;
+                
+                img.onload = function() {
+                    status.textContent = `✅ 成功載入 (使用備用方案 ${currentIndex + 1})`;
+                    status.className = 'status success';
+                };
+                
+                img.onerror = function() {
+                    currentIndex++;
+                    setTimeout(tryNextUrl, 2000); // 等待 2 秒後嘗試下一個
+                };
+                
+                img.src = currentUrl;
+            }
+            
+            tryNextUrl();
+        }
+        
+        // 執行測試
+        setupSimpleTest('img1', 'status1', 'https://image.pollinations.ai/prompt/cute%20cartoon%20dog');
+        setupSimpleTest('img2', 'status2', 'https://image.pollinations.ai/prompt/dog');
+        setupFallbackTest();
+        
+        console.log('🧪 All tests started');
+    </script>
+</body>
+</html>

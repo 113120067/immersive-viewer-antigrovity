@@ -8,6 +8,7 @@
   "dependencies": {
     "@azure/cognitiveservices-computervision": "^8.2.0",
     "@azure/ms-rest-azure-js": "^2.1.0",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.8.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
@@ -19,6 +20,7 @@
     "mammoth": "^1.6.0",
     "morgan": "~1.9.1",
     "multer": "^2.0.2",
+    "openai": "^6.10.0",
     "pdf-parse": "^1.1.1",
     "pug": "3.0.3",
     "sanitize-html": "^2.11.0"

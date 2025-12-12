@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Pollinations Image Loading</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-container { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        img { max-width: 300px; border: 2px solid #28a745; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Pollinations 圖片載入測試</h1>
+    
+    <div class="test-container">
+        <h3>測試 1: 簡單單字 "dog"</h3>
+        <div id="status1" class="status loading">載入中...</div>
+        <img id="img1" src="https://image.pollinations.ai/prompt/dog" alt="Dog">
+    </div>
+    
+    <div class="test-container">
+        <h3>測試 2: 複雜提示詞 "cute cartoon dog"</h3>
+        <div id="status2" class="status loading">載入中...</div>
+        <img id="img2" src="https://image.pollinations.ai/prompt/cute%20cartoon%20dog" alt="Cute Cartoon Dog">
+    </div>
+    
+    <div class="test-container">
+        <h3>測試 3: Kids Vocabulary 風格提示詞</h3>
+        <div id="status3" class="status loading">載入中...</div>
+        <img id="img3" src="https://image.pollinations.ai/prompt/A%20cute%2C%20colorful%2C%20child-friendly%20cartoon%20illustration%20of%20dog" alt="Kids Style Dog">
+    </div>
+
+    <script>
+        function setupImageTest(imgId, statusId) {
+            const img = document.getElementById(imgId);
+            const status = document.getElementById(statusId);
+            
+            img.onload = function() {
+                status.textContent = '✅ 圖片載入成功！';
+                status.className = 'status success';
+                console.log(`${imgId} loaded successfully`);
+            };
+            
+            img.onerror = function(error) {
+                status.textContent = '❌ 圖片載入失敗';
+                status.className = 'status error';
+                console.error(`${imgId} failed to load:`, error);
+            };
+            
+            // 設置超時
+            setTimeout(() => {
+                if (status.className.includes('loading')) {
+                    status.textContent = '⏰ 載入超時（但圖片可能仍在生成中）';
+                    status.className = 'status error';
+                }
+            }, 15000);
+        }
+        
+        // 設置所有測試
+        setupImageTest('img1', 'status1');
+        setupImageTest('img2', 'status2');
+        setupImageTest('img3', 'status3');
+        
+        console.log('🧪 Image loading tests started');
+    </script>
+</body>
+</html>

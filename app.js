@@ -16,6 +16,10 @@ var classroomRouter = require('./routes/classroom');
 var firebaseConfigRouter = require('./routes/firebase-config');
 var immersiveReaderRouter = require('./routes/immersive-reader');
 var visionRouter = require('./routes/vision');
+var imageGeneratorRouter = require('./routes/image-generator');
+var vocabularyGeneratorRouter = require('./routes/vocabulary-generator');
+var kidsVocabularyRouter = require('./routes/kids-vocabulary');
+var usageStatsRouter = require('./routes/usage-stats');
 
 var app = express();
 
@@ -39,6 +43,10 @@ app.use('/classroom', classroomRouter);
 app.use('/config', firebaseConfigRouter);
 app.use('/', immersiveReaderRouter);
 app.use('/vision', visionRouter);
+app.use('/image-generator', imageGeneratorRouter);
+app.use('/vocabulary-generator', vocabularyGeneratorRouter);
+app.use('/kids-vocabulary', kidsVocabularyRouter);
+app.use('/usage-stats', usageStatsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

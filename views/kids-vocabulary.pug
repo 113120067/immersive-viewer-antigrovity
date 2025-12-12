@@ -1,0 +1,228 @@
+extends layout
+
+block content
+  .container.mt-4
+    .row.justify-content-center
+      .col-md-8
+        // 主要區域
+        .card.border-success.shadow
+          .card-header.bg-success.text-white.text-center
+            h3.mb-0 
+              | 🌟 小學生英文學習圖片生成器 🌟
+            p.mb-0.small 輸入英文單字或句子，AI 幫你畫圖片！
+          
+          .card-body.p-4
+            // 歡迎訊息
+            .alert.alert-info.text-center.mb-4#welcomeMessage
+              h5 
+                | 👋 歡迎小朋友！
+              p.mb-0 輸入英文單字或句子，我會幫你畫一張可愛的圖片來學習！
+            
+            // 簡單輸入表單
+            form#simpleVocabForm
+              .mb-4
+                label.form-label.h5(for="wordInput") 
+                  | 🔤 請輸入英文單字或句子：
+                .input-group.input-group-lg
+                  input#wordInput.form-control.form-control-lg(
+                    type="text" 
+                    placeholder="例如：apple, I am happy, good morning..."
+                    style="font-size: 18px;"
+                    required
+                  )
+                  button#generateBtn.btn.btn-success.btn-lg(type="submit")
+                    i.fas.fa-magic
+                    |  生成圖片！
+                .form-text.mt-2
+                  | 💡 單字：apple, dog, smile, house, book
+                  br
+                  | 💬 句子：I am happy, good morning, I like cats
+              
+              // 發音功能設定
+              .row.mt-3
+                .col-md-6
+                  .form-check.form-switch
+                    input#pronunciationToggle.form-check-input(type="checkbox" checked)
+                    label.form-check-label(for="pronunciationToggle")
+                      | 🔊 自動發音
+                      small.text-muted.d-block 生成圖片後自動播放單字發音
+                
+                .col-md-6
+                  .form-check.form-switch
+                    input#practiceToggle.form-check-input(type="checkbox")
+                    label.form-check-label(for="practiceToggle")
+                      | 🎤 練習發音
+                      small.text-muted.d-block 開啟語音識別練習功能
+              
+              // 隱藏的進階選項（預設為小學生友善設置）
+              input#providerSelect(type="hidden" value="pollinations")
+              input#styleSelect(type="hidden" value="cartoon")
+              input#levelSelect(type="hidden" value="beginner")
+              input#techniqueSelect(type="hidden" value="story")
+              input#includeTextCheck(type="hidden" value="true")
+            
+            // 生成狀態
+            .mt-4#generationStatus(style="display: none")
+              .alert.alert-primary.text-center
+                .spinner-border.text-primary.me-3
+                h5.d-inline 
+                  | 🎨 正在為你畫圖片...
+                p.mb-0.small 請稍等 10-20 秒
+            
+            // 錯誤訊息
+            .mt-3#errorMessage(style="display: none")
+              .alert.alert-warning.text-center
+                i.fas.fa-exclamation-triangle.me-2
+                span#errorText
+      
+      .col-md-4
+        // 結果區域
+        .card.border-primary.shadow
+          .card-header.bg-primary.text-white.text-center
+            h5.mb-0 
+              | 🖼️ 你的圖片
+          .card-body.text-center
+            // 圖片顯示
+            .image-result#imageResult(style="display: none")
+              .mb-3
+                img#generatedImage.img-fluid.rounded.shadow(style="max-width: 100%; border: 3px solid #28a745;")
+              
+              .word-info.bg-light.p-3.rounded.mb-3
+                h4.text-success.mb-1#wordTitle 單字
+                p.text-muted.mb-2#wordMeaning 意思
+                
+                // 發音控制按鈕
+                .pronunciation-controls.mt-2
+                  .row.g-2
+                    .col-6
+                      button#pronounceBtn.btn.btn-primary.btn-sm.w-100(type="button")
+                        i.fas.fa-volume-up.me-1
+                        | 🔊 發音
+                    .col-6
+                      button#practiceBtn.btn.btn-warning.btn-sm.w-100(type="button" style="display: none")
+                        i.fas.fa-microphone.me-1
+                        | 🎤 練習
+                
+                // 練習發音結果
+                .practice-result.mt-2#practiceResult(style="display: none")
+                  .alert.alert-info.small.mb-0
+                    .d-flex.align-items-center
+                      .spinner-border.spinner-border-sm.me-2#practiceSpinner(style="display: none")
+                      span#practiceText 點擊麥克風開始練習發音...</span>
+              
+              .mb-3
+                small.text-muted#aiProvider 
+                  | 🤖 由 AI 生成
+              
+              .d-grid
+                a#downloadLink.btn.btn-outline-success(download="my-word-image.png")
+                  i.fas.fa-download.me-2
+                  | 下載圖片
+            
+            // 佔位符
+            .placeholder-content#placeholderContent
+              .text-center.text-muted.py-5
+                i.fas.fa-image.fa-4x.mb-3.text-light
+                h5 你的圖片會出現在這裡
+                p.small 輸入單字後點擊「生成圖片」
+        
+        // 最近的內容
+        .card.mt-3.border-info
+          .card-header.bg-info.text-white.text-center
+            h6.mb-0 
+              | 📚 最近學過的內容
+          .card-body
+            .small#recentWords
+              p.text-muted.text-center 還沒有學過的內容
+
+  // 特殊樣式
+  style.
+    body {
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    }
+    
+    .card {
+      border-radius: 15px;
+    }
+    
+    .card-header {
+      border-radius: 15px 15px 0 0 !important;
+    }
+    
+    #wordInput {
+      border-radius: 25px;
+      border: 3px solid #28a745;
+      text-align: center;
+      font-weight: bold;
+    }
+    
+    #wordInput:focus {
+      border-color: #20c997;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    #generateBtn {
+      border-radius: 25px;
+      font-weight: bold;
+      min-width: 120px;
+    }
+    
+    #generatedImage {
+      transition: transform 0.3s ease;
+    }
+    
+    #generatedImage:hover {
+      transform: scale(1.05);
+    }
+    
+    .placeholder-content {
+      border: 3px dashed #dee2e6;
+      border-radius: 15px;
+      background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
+                  linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
+                  linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+                  linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    
+    .word-info {
+      border: 2px solid #28a745;
+      border-radius: 10px;
+    }
+    
+    .spinner-border {
+      width: 2rem;
+      height: 2rem;
+    }
+    
+    .recent-word-item {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .recent-word-item:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+    }
+
+block scripts
+  script(src="/js/kids-vocabulary.js" type="module")
+  script.
+    // 頁面載入動畫
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🌟 Kids Vocabulary Generator loaded');
+      
+      // 簡單的歡迎動畫
+      setTimeout(() => {
+        const welcome = document.getElementById('welcomeMessage');
+        if (welcome) {
+          welcome.style.animation = 'pulse 2s infinite';
+        }
+      }, 1000);
+    });
