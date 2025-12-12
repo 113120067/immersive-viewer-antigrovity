@@ -1,333 +1,271 @@
-# Immersive Reader - Node.js Sample
+# 🎓 智慧教室管理系統
 
-## Prerequisites
+> 整合 Microsoft Immersive Reader、Azure AI 和 Firebase 的現代化學習平台
 
-* An Immersive Reader resource configured for Azure Active Directory authentication. Follow [these instructions](https://docs.microsoft.com/azure/applied-ai-services/immersive-reader/how-to-create-immersive-reader) to get set up. You will need some of the values created here when configuring the sample project properties. Save the output of your session into a text file for future reference.
-* Install [Yarn](https://yarnpkg.com), [npm](https://npmjs.com)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-9+-orange.svg)](https://firebase.google.com/)
+[![Azure](https://img.shields.io/badge/Azure-AI-blue.svg)](https://azure.microsoft.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Usage
+## 🌟 功能特色
 
-1. Open a command prompt (Windows) or terminal (OSX, Linux)
+### 🏫 智慧教室管理
+- **雙模式儲存**：匿名用戶（記憶體24小時）+ 認證用戶（Firebase永久）
+- **即時進度追蹤**：學習時間、單字掌握度、排行榜
+- **教師控制面板**：課堂管理、學生監控、統計分析
+- **學生學習介面**：個人進度、互動學習、成就系統
 
-1. Navigate to the project directory
+### 🤖 AI 智慧功能
+- **Azure Computer Vision**：OCR文字識別、圖像分析
+- **Microsoft Immersive Reader**：沉浸式閱讀體驗
+- **智慧詞彙提取**：多格式文件處理、自動分詞
+- **多語言支援**：特別優化繁體中文
 
-1. Run `npm install`
+### 🔐 安全性設計
+- **Firebase Authentication**：OAuth 2.0 認證
+- **Firestore Security Rules**：資料存取控制
+- **輸入驗證**：防止 XSS 和注入攻擊
+- **環境變數管理**：敏感資料保護
 
-1. Create a file called **.env** and add the following, supplying values as appropriate (see `.env.example` for all options).
+## 🚀 快速開始
 
-    ```text
-    # Azure Immersive Reader
-    TENANT_ID={YOUR_TENANT_ID}
-    CLIENT_ID={YOUR_CLIENT_ID}
-    CLIENT_SECRET={YOUR_CLIENT_SECRET}
-    SUBDOMAIN={YOUR_SUBDOMAIN}
-    
-    # Firebase Web Config (Required for authentication)
-    FIREBASE_API_KEY={YOUR_API_KEY}
-    FIREBASE_AUTH_DOMAIN={YOUR_AUTH_DOMAIN}
-    FIREBASE_PROJECT_ID={YOUR_PROJECT_ID}
-    FIREBASE_APP_ID={YOUR_APP_ID}
-    
-    # Firebase Admin SDK (Optional, for persistent storage)
-    FIREBASE_SERVICE_ACCOUNT='{"type":"service_account",...}'
-    # OR
-    # FIREBASE_SERVICE_ACCOUNT=/path/to/serviceAccountKey.json
-    
-    # Azure Computer Vision (Optional, for OCR and image analysis)
-    AZURE_VISION_KEY={YOUR_AZURE_VISION_KEY}
-    AZURE_VISION_ENDPOINT={YOUR_AZURE_VISION_ENDPOINT}
-    ```
+### 前置需求
+- Node.js 18+
+- npm 或 yarn
+- Firebase 專案（選用）
+- Azure Computer Vision 服務（選用）
 
-1. Run `npm start` (or `nodemon start` if you want to view changes you make after doing a browser refresh)
-
-1. Open a web browser and navigate to [http://localhost:3000](http://localhost:3000) to view the sample
-
-## Classroom Feature - Dual-Mode Storage
-
-The application includes a powerful classroom management system with **dual-mode storage**:
-- **Anonymous Mode**: Temporary classrooms stored in memory (24-hour expiry) - no login required
-- **Authenticated Mode**: Permanent classrooms stored in Firestore - requires Firebase authentication
-
-### Features
-
-#### For Teachers
-- **Create Classrooms**: Upload vocabulary files to create classrooms with unique codes
-- **Monitor Progress**: View real-time student leaderboards and statistics
-- **My Classrooms Dashboard**: Manage all your classrooms in one place
-
-#### For Students
-- **Easy Join**: Join classrooms using 4-character codes
-- **Track Progress**: View detailed learning statistics and progress charts
-- **Leaderboard**: Compete with classmates on learning time
-
-### Firebase Setup (Optional - for permanent storage)
-
-1. **Create a Firebase Project**:
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project
-
-2. **Enable Authentication**:
-   - In Firebase Console, go to Authentication > Sign-in method
-   - Enable Google and/or Email/Password authentication
-
-3. **Get Web Config**:
-   - Go to Project Settings > General
-   - Scroll to "Your apps" and add a web app
-   - Copy the config values to your `.env` file
-
-4. **Enable Firestore**:
-   - In Firebase Console, go to Firestore Database
-   - Click "Create database"
-   - Choose production mode
-   - Select a location
-
-5. **Set up Admin SDK**:
-   - Go to Project Settings > Service Accounts
-   - Click "Generate new private key"
-   - Download the JSON file
-   - Set `FIREBASE_SERVICE_ACCOUNT` in `.env` to either:
-     - The JSON file path: `/path/to/serviceAccountKey.json`
-     - Or the entire JSON as a string (escaped)
-
-6. **Deploy Security Rules and Indexes**:
-   ```bash
-   # Install Firebase CLI
-   npm install -g firebase-tools
-   
-   # Login to Firebase
-   firebase login
-   
-   # Initialize Firebase (select Firestore only)
-   firebase init firestore
-   
-   # Deploy rules and indexes
-   firebase deploy --only firestore
-   ```
-
-### Using the Classroom System
-
-#### Without Login (Temporary Mode)
-1. Go to [http://localhost:3000/classroom/create](http://localhost:3000/classroom/create)
-2. Upload a vocabulary file and create a classroom
-3. Share the 4-digit code with students
-4. **Note**: Classroom will be deleted after 24 hours or when server restarts
-
-#### With Login (Permanent Mode)
-1. Go to [http://localhost:3000/login.html](http://localhost:3000/login.html) and sign in
-2. Create classrooms - they will be permanently saved
-3. Access "My Classrooms" from the navigation bar to:
-   - View all classrooms you created
-   - See classrooms you joined as a student
-   - Check detailed learning progress with charts
-
-### API Endpoints
-
-See `ARCHITECTURE.md` for complete API documentation.
-
-## Upload and Save Vocabulary Feature
-
-This application includes a simple vocabulary extraction and storage feature for quick testing. **Note:** This feature uses a local JSON file store without database or authentication - it's intended for development/testing purposes only.
-
-### Features
-
-- **Upload text files** (.txt) to extract vocabulary words
-- **Select and save** words to build a personal vocabulary list
-- **View saved vocabulary** with source information
-
-### Usage
-
-#### Web Interface
-
-1. Navigate to [http://localhost:3000/upload-vocab](http://localhost:3000/upload-vocab)
-2. Upload a .txt file
-3. Select words from the extracted list
-4. Click "Save Selected Words" to add them to your vocabulary
-5. View all saved words in the "Saved Vocabulary" section
-
-#### API Endpoints
-
-**Extract words from uploaded file:**
+### 基礎安裝（記憶體模式）
 ```bash
-curl -X POST http://localhost:3000/api/upload \
-  -F "file=@yourfile.txt"
+# 1. 克隆專案
+git clone https://github.com/你的用戶名/immersive-viewer-enhanced.git
+cd immersive-viewer-enhanced
+
+# 2. 安裝依賴
+npm install
+
+# 3. 啟動服務
+npm start
+
+# 4. 開啟瀏覽器
+# http://localhost:3000
 ```
 
-Response:
-```json
-{
-  "success": true,
-  "filename": "yourfile.txt",
-  "wordCount": 150,
-  "words": ["word1", "word2", ...]
-}
-```
+### 完整安裝（雲端模式）
 
-**Save selected words:**
+#### 1. 設定 Firebase
 ```bash
-curl -X POST http://localhost:3000/api/vocab/save \
-  -H "Content-Type: application/json" \
-  -d '{"words": ["hello", "world"], "source": "myfile.txt"}'
+# 建立 Firebase 專案
+# 1. 到 https://console.firebase.google.com/
+# 2. 建立新專案
+# 3. 啟用 Authentication 和 Firestore
+# 4. 下載服務帳戶金鑰
 ```
 
-Response:
-```json
-{
-  "success": true,
-  "saved": 2,
-  "total": 50,
-  "newWords": ["hello", "world"]
-}
-```
-
-**List all saved vocabulary:**
+#### 2. 設定 Azure Computer Vision
 ```bash
-curl http://localhost:3000/api/vocab/list
+# 1. 到 https://portal.azure.com/
+# 2. 建立 Computer Vision 資源
+# 3. 取得 API Key 和 Endpoint
 ```
 
-Response:
-```json
-{
-  "success": true,
-  "count": 50,
-  "words": [
-    {"word": "hello", "source": "myfile.txt", "timestamp": "2024-01-01T12:00:00.000Z"},
-    ...
-  ]
-}
-```
-
-### Data Storage
-
-Vocabulary data is stored in `data/vocab-store.json`. This is a simple JSON file (no database required) suitable for testing. The file is created automatically when you save your first words.
-
-## Azure Computer Vision Feature
-
-The application includes Azure Computer Vision integration for **OCR text recognition** and **intelligent image analysis**.
-
-### Features
-
-- **OCR Text Recognition**: Extract text from images (supports Traditional Chinese and multiple languages)
-- **Smart Tags**: AI-generated tags describing image content
-- **Image Description**: Automated captions for images
-- **Object Detection**: Identify and locate objects in images
-- **Color Analysis**: Detect dominant colors and accent colors
-
-### Setup
-
-1. **Create Azure Computer Vision Resource**:
-   - Go to [Azure Portal](https://portal.azure.com/)
-   - Create a new "Computer Vision" resource
-   - Note the **Key** and **Endpoint** from the resource
-
-2. **Configure Environment Variables**:
-   ```text
-   AZURE_VISION_KEY=your_azure_vision_key
-   AZURE_VISION_ENDPOINT=https://your-resource-name.cognitiveservices.azure.com/
-   ```
-
-3. **Access the Feature**:
-   - Navigate to [http://localhost:3000/vision-analyzer](http://localhost:3000/vision-analyzer)
-   - Upload an image (JPEG, PNG, GIF, BMP, max 5MB)
-   - Choose "Complete Analysis" or "OCR Only"
-
-### API Endpoints
-
-**Upload and Analyze Image**
+#### 3. 配置環境變數
 ```bash
-curl -X POST http://localhost:3000/vision/analyze \
-  -F "image=@test-image.jpg" \
-  -F "userId=user123"
+# 複製環境變數範本
+cp .env.example .env
+
+# 編輯 .env 文件，填入你的服務金鑰
 ```
 
-**OCR Only**
+#### 4. 部署 Firestore 規則
 ```bash
-curl -X POST http://localhost:3000/vision/ocr-only \
-  -F "image=@document.jpg"
+# 安裝 Firebase CLI
+npm install -g firebase-tools
+
+# 登入 Firebase
+firebase login
+
+# 部署規則和索引
+firebase deploy --only firestore
 ```
 
-**Get Analysis Result**
-```bash
-curl http://localhost:3000/vision/analysis/{analysisId}
+## 📁 專案結構
+
+```
+immersive-viewer-enhanced/
+├── 📂 src/
+│   ├── 📂 config/           # 配置文件
+│   │   ├── firebase-admin.js    # Firebase Admin SDK
+│   │   └── multer-config.js     # 文件上傳配置
+│   ├── 📂 middleware/       # 中介軟體
+│   │   └── auth-middleware.js   # 認證中介軟體
+│   ├── 📂 services/         # 服務層
+│   │   ├── classroom-manager.js      # 教室管理器
+│   │   ├── firestore-classroom-service.js  # Firestore 服務
+│   │   └── azureVision.js            # Azure AI 服務
+│   └── 📂 utils/            # 工具函數
+├── 📂 routes/               # API 路由
+├── 📂 views/                # 頁面模板
+├── 📂 public/               # 靜態資源
+│   └── 📂 js/               # 前端 JavaScript
+└── 📂 docs/                 # 文檔
 ```
 
-**Search Analyses**
-```bash
-# Search by text in OCR results
-curl "http://localhost:3000/vision/search?userId=user123&query=書本&type=text"
+## 🎯 使用場景
 
-# Search by tags
-curl "http://localhost:3000/vision/search?userId=user123&query=book&type=tags"
-```
+### 👨‍🏫 教師使用流程
+1. **建立課堂**：上傳詞彙文件，生成課堂代碼
+2. **分享代碼**：學生使用4位代碼加入課堂
+3. **監控進度**：即時查看學習統計和排行榜
+4. **管理課堂**：查看詳細進度、匯出報告
 
-### Data Storage
+### 👨‍🎓 學生使用流程
+1. **加入課堂**：輸入課堂代碼和姓名
+2. **開始學習**：使用 Immersive Reader 學習詞彙
+3. **追蹤進度**：查看個人統計和班級排名
+4. **互動功能**：單字交換、練習記錄
 
-Analysis results are stored in Firestore collection `vision-analysis` with the following structure:
-- `userId`: User identifier
-- `imageUrl`: Public URL of the uploaded image
-- `ocrText`: Extracted text
-- `tags`: AI-generated tags with confidence scores
-- `description`: Image captions
-- `objects`: Detected objects with bounding boxes
-- `colors`: Color analysis results
+## 🔧 API 文檔
 
-### Security
-
-- Firestore security rules ensure users can only access their own analysis results
-- Image uploads are limited to 5MB
-- Only authenticated users can create analyses (when Firebase Auth is configured)
-
-## License
-
-Copyright (c) Microsoft Corporation. All rights reserved.
-
-Licensed under the MIT License.
-
-## Immersive Reader Integration (快速上手)
-
-This project includes helper code to launch Microsoft Immersive Reader from the browser. Below are configuration and usage examples so you can call Immersive Reader from pages such as `notes.html` or `upload-vocab`.
-
-### Server environment variables
-Create a `.env` (or set platform environment variables) with the same values used by the Home sample. Example variables the project reads:
-
-```text
-TENANT_ID={YOUR_TENANT_ID}
-CLIENT_ID={YOUR_CLIENT_ID}
-CLIENT_SECRET={YOUR_CLIENT_SECRET}
-SUBDOMAIN={YOUR_SUBDOMAIN}
-```
-
-- `SUBDOMAIN` should be the host for your Cognitive Services/Immersive Reader resource (for example `your-resource-name.cognitiveservices.azure.com`).
-
-The project exposes two compatible token endpoints the client will try:
-
-- `/api/immersive-reader-token` (new route) — implemented in `routes/immersive-reader.js` using Azure AD client credentials flow.
-- `/GetTokenAndSubdomain` (legacy route) — implemented in `routes/index.js` (same pattern used by the Home sample).
-
-Make sure the env vars above are configured and the server is restarted after changes.
-
-### Front-end helper module
-We added a reusable ES module at `public/js/immersive-reader-client.js` that encapsulates SDK loading, token acquisition and launching the Immersive Reader. Example functions:
-
-- `launchFromText(title, text, lang, options)` — convert plain text to HTML and open IR.
-- `launchFromHtml(title, html, lang, options)` — launch IR from an HTML string.
-
-Example usage in a module-enabled page (notes or upload-vocab):
-
+### 教室管理 API
 ```javascript
-import { launchFromText } from '/js/immersive-reader-client.js';
+// 建立課堂
+POST /classroom/create
+Content-Type: multipart/form-data
+Authorization: Bearer <token> (optional)
 
-// Launch Immersive Reader for a single note
-await launchFromText('My Note Title', note.content, 'zh-Hant', { uiLang: 'zh-Hant' });
+// 加入課堂
+POST /classroom/join
+{
+  "code": "ABC1",
+  "studentName": "小明"
+}
+
+// 開始學習會話
+POST /classroom/api/session/start
+{
+  "code": "ABC1",
+  "studentName": "小明"
+}
 ```
 
-The helper will automatically try to fetch credentials from `/api/immersive-reader-token` and fall back to `/GetTokenAndSubdomain` if necessary, and will dynamically load the Immersive Reader SDK if it's not already present on the page.
+### 認證 API
+```javascript
+// 我的課堂（需要認證）
+GET /classroom/api/my-classrooms
+Authorization: Bearer <token>
 
-### Server-side token endpoint (already provided)
-The repo includes a server endpoint (`routes/immersive-reader.js`) that uses the Azure AD client credentials flow to issue a short-lived token for the client. You must set `CLIENT_ID`, `CLIENT_SECRET`, `TENANT_ID` and `SUBDOMAIN` in your environment for this to work. The endpoint returns `{ token, subdomain }` which the client uses to call `ImmersiveReader.launchAsync`.
+// 學習進度（需要認證）
+GET /classroom/api/progress/:classroomId
+Authorization: Bearer <token>
+```
 
-### Notes & best practices
-- Do NOT store subscription secrets or client secrets in client-side code. Always obtain IR tokens server-side.
-- Keep `SUBDOMAIN` and Azure credentials out of source control. Use environment variables or your hosting platform's secret management.
-- For long notes split content into chunks if needed; the helper does a simple paragraph-based split for plain text.
+## 📊 資料庫設計
 
-If you want, I can add a small `.env.example` file to the repo and update `ReadMe.md` with a one-line command to restart the server after env changes.
+### Firestore 集合結構
+```javascript
+// classrooms 集合
+{
+  code: "ABC1",
+  name: "英文課",
+  words: ["apple", "banana"],
+  ownerId: "firebase-uid",
+  createdAt: Timestamp
+}
+
+// classrooms/{id}/students 子集合
+{
+  name: "小明",
+  totalTime: 3600,
+  wordStats: {
+    "apple": { correct: 5, wrong: 2 }
+  }
+}
+```
+
+## 🛡️ 安全性
+
+### Firestore Security Rules
+```javascript
+// 只有課堂擁有者可以讀取私人課堂
+match /classrooms/{classroomId} {
+  allow read: if resource.data.isPublic == true 
+    || request.auth.uid == resource.data.ownerId;
+  allow create: if request.auth != null 
+    && request.auth.uid == request.resource.data.ownerId;
+}
+```
+
+### 環境變數安全
+- 所有敏感資料存放在 `.env` 文件
+- `.env` 已加入 `.gitignore`
+- 生產環境使用平台環境變數
+
+## 🚀 部署指南
+
+### Vercel 部署
+```bash
+# 1. 安裝 Vercel CLI
+npm i -g vercel
+
+# 2. 部署
+vercel
+
+# 3. 設定環境變數
+vercel env add FIREBASE_SERVICE_ACCOUNT
+```
+
+### Railway 部署
+```bash
+# 1. 連接 GitHub repository
+# 2. 在 Railway 控制台設定環境變數
+# 3. 自動部署
+```
+
+## 🧪 測試
+
+```bash
+# 執行測試
+npm test
+
+# 測試覆蓋率
+npm run test:coverage
+
+# 端對端測試
+npm run test:e2e
+```
+
+## 📈 效能優化
+
+- **Firestore 索引**：優化查詢效能
+- **CDN 快取**：靜態資源加速
+- **圖片壓縮**：減少載入時間
+- **代碼分割**：按需載入
+
+## 🤝 貢獻指南
+
+1. Fork 專案
+2. 建立功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add amazing feature'`)
+4. 推送分支 (`git push origin feature/amazing-feature`)
+5. 開啟 Pull Request
+
+## 📄 授權
+
+本專案採用 MIT 授權 - 詳見 [LICENSE](LICENSE) 文件
+
+## 🙏 致謝
+
+- [Microsoft Immersive Reader](https://docs.microsoft.com/azure/applied-ai-services/immersive-reader/)
+- [Azure Computer Vision](https://azure.microsoft.com/services/cognitive-services/computer-vision/)
+- [Firebase](https://firebase.google.com/)
+- [Express.js](https://expressjs.com/)
+
+## 📞 聯絡方式
+
+- 專案連結：[https://github.com/你的用戶名/immersive-viewer-enhanced](https://github.com/你的用戶名/immersive-viewer-enhanced)
+- 問題回報：[Issues](https://github.com/你的用戶名/immersive-viewer-enhanced/issues)
+
+---
+
+⭐ 如果這個專案對你有幫助，請給個星星支持！
