@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>手機字體測試</title>
+    <style>
+        /* 重置所有樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* 手機版超大字體 */
+        @media screen and (max-width: 576px) {
+            body {
+                font-size: 80px !important;
+                line-height: 1.2;
+            }
+            
+            .title {
+                font-size: 100px !important;
+                color: #28a745;
+                text-align: center;
+                margin-bottom: 30px;
+                font-weight: bold;
+            }
+            
+            .input-box {
+                width: 100%;
+                font-size: 80px !important;
+                padding: 40px;
+                border: 6px solid #28a745;
+                border-radius: 20px;
+                text-align: center;
+                margin-bottom: 30px;
+                background: white;
+            }
+            
+            .big-button {
+                width: 100%;
+                font-size: 80px !important;
+                padding: 40px;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 20px;
+                font-weight: bold;
+                margin-bottom: 30px;
+            }
+            
+            .test-text {
+                font-size: 60px !important;
+                color: #333;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+        }
+        
+        /* 桌面版正常字體 */
+        @media screen and (min-width: 577px) {
+            body {
+                font-size: 16px;
+            }
+            
+            .title {
+                font-size: 24px;
+                color: #28a745;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            
+            .input-box {
+                width: 100%;
+                font-size: 18px;
+                padding: 12px;
+                border: 2px solid #28a745;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            
+            .big-button {
+                width: 100%;
+                font-size: 18px;
+                padding: 12px;
+                background: #28a745;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            
+            .test-text {
+                font-size: 16px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="title">🌟 手機字體測試 🌟</div>
+    
+    <input type="text" class="input-box" placeholder="輸入測試文字" value="apple">
+    
+    <button class="big-button">🎨 生成圖片</button>
+    
+    <div class="test-text">📱 這是手機版測試文字</div>
+    <div class="test-text">🔤 請輸入英文單字</div>
+    <div class="test-text">✨ 完全免費使用</div>
+    
+    <script>
+        // 顯示螢幕資訊
+        document.addEventListener('DOMContentLoaded', function() {
+            const info = document.createElement('div');
+            info.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                z-index: 1000;
+            `;
+            info.innerHTML = `
+                螢幕寬度: ${window.innerWidth}px<br>
+                螢幕高度: ${window.innerHeight}px<br>
+                裝置像素比: ${window.devicePixelRatio}<br>
+                User Agent: ${navigator.userAgent.includes('Mobile') ? '手機' : '桌面'}
+            `;
+            document.body.appendChild(info);
+        });
+    </script>
+</body>
+</html>

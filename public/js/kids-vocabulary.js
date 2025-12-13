@@ -98,23 +98,45 @@ class KidsVocabularyGenerator {
       this.generateImage();
     });
 
-    // 輸入框 Enter 鍵
+    // 手機版輸入框 Enter 鍵
     const wordInput = document.getElementById('wordInput');
-    wordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.generateImage();
-      }
-    });
+    if (wordInput) {
+      wordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.generateImage();
+        }
+      });
 
-    // 輸入框焦點效果
-    wordInput.addEventListener('focus', () => {
-      wordInput.style.borderColor = '#20c997';
-    });
+      // 輸入框焦點效果
+      wordInput.addEventListener('focus', () => {
+        wordInput.style.borderColor = '#20c997';
+      });
 
-    wordInput.addEventListener('blur', () => {
-      wordInput.style.borderColor = '#28a745';
-    });
+      wordInput.addEventListener('blur', () => {
+        wordInput.style.borderColor = '#28a745';
+      });
+    }
+
+    // 桌面版輸入框 Enter 鍵
+    const wordInputDesktop = document.getElementById('wordInputDesktop');
+    if (wordInputDesktop) {
+      wordInputDesktop.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.generateImage();
+        }
+      });
+
+      // 輸入框焦點效果
+      wordInputDesktop.addEventListener('focus', () => {
+        wordInputDesktop.style.borderColor = '#20c997';
+      });
+
+      wordInputDesktop.addEventListener('blur', () => {
+        wordInputDesktop.style.borderColor = '#28a745';
+      });
+    }
     
     // 發音功能切換
     const pronunciationToggle = document.getElementById('pronunciationToggle');
@@ -175,7 +197,10 @@ class KidsVocabularyGenerator {
   async generateImage() {
     if (this.isGenerating) return;
 
-    const input = document.getElementById('wordInput').value.trim();
+    // 獲取輸入值（手機版或桌面版）
+    const mobileInput = document.getElementById('wordInput');
+    const desktopInput = document.getElementById('wordInputDesktop');
+    const input = (mobileInput && mobileInput.offsetParent !== null ? mobileInput.value : desktopInput.value).trim();
 
     // 驗證輸入
     if (!input) {
@@ -304,8 +329,11 @@ class KidsVocabularyGenerator {
     placeholder.style.display = 'none';
     resultContainer.style.display = 'block';
 
-    // 清空輸入框
-    document.getElementById('wordInput').value = '';
+    // 清空輸入框（手機版和桌面版）
+    const mobileInputClear = document.getElementById('wordInput');
+    const desktopInputClear = document.getElementById('wordInputDesktop');
+    if (mobileInputClear) mobileInputClear.value = '';
+    if (desktopInputClear) desktopInputClear.value = '';
 
     const contentType = wordCount === 1 ? '單字' : '句子';
     this.showSuccess(`太棒了！"${input}" 的圖片生成完成！`);
@@ -541,13 +569,18 @@ class KidsVocabularyGenerator {
     }
     
     const wordsHTML = this.recentWords.slice(0, 5).map(item => {
-      const displayText = item.word.length > 15 ? item.word.substring(0, 15) + '...' : item.word;
+      const displayText = item.word.length > 12 ? item.word.substring(0, 12) + '...' : item.word;
       const typeIcon = item.type === 'sentence' ? '💬' : '📝';
       
       return `
         <div class="recent-word-item" onclick="kidsVocabGenerator.loadWord('${item.word.replace(/'/g, "\\'")}')">
-          <strong>${typeIcon} ${displayText}</strong>
-          <br><small class="text-muted">${item.meaning}</small>
+          <div class="d-flex align-items-center">
+            <span class="me-2">${typeIcon}</span>
+            <div class="flex-grow-1">
+              <div class="fw-bold">${displayText}</div>
+              <small class="text-muted">${item.meaning}</small>
+            </div>
+          </div>
         </div>
       `;
     }).join('');
@@ -559,8 +592,17 @@ class KidsVocabularyGenerator {
    * 載入單字/句子到輸入框
    */
   loadWord(input) {
-    document.getElementById('wordInput').value = input;
-    document.getElementById('wordInput').focus();
+    // 載入到可見的輸入框
+    const mobileInput = document.getElementById('wordInput');
+    const desktopInput = document.getElementById('wordInputDesktop');
+    
+    if (mobileInput && mobileInput.offsetParent !== null) {
+      mobileInput.value = input;
+      mobileInput.focus();
+    } else if (desktopInput) {
+      desktopInput.value = input;
+      desktopInput.focus();
+    }
   }
 
   /**
@@ -568,16 +610,37 @@ class KidsVocabularyGenerator {
    */
   showGenerationStatus(show) {
     const statusElement = document.getElementById('generationStatus');
-    const generateBtn = document.getElementById('generateBtn');
+    const generateBtnMobile = document.getElementById('generateBtn');
+    const generateBtnDesktop = document.getElementById('generateBtnDesktop');
 
     if (show) {
       statusElement.style.display = 'block';
-      generateBtn.disabled = true;
-      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+      
+      // 手機版按鈕
+      if (generateBtnMobile) {
+        generateBtnMobile.disabled = true;
+        generateBtnMobile.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+      }
+      
+      // 桌面版按鈕
+      if (generateBtnDesktop) {
+        generateBtnDesktop.disabled = true;
+        generateBtnDesktop.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+      }
     } else {
       statusElement.style.display = 'none';
-      generateBtn.disabled = false;
-      generateBtn.innerHTML = '<i class="fas fa-magic"></i> 生成圖片！';
+      
+      // 手機版按鈕
+      if (generateBtnMobile) {
+        generateBtnMobile.disabled = false;
+        generateBtnMobile.innerHTML = '🎨 生成圖片！';
+      }
+      
+      // 桌面版按鈕
+      if (generateBtnDesktop) {
+        generateBtnDesktop.disabled = false;
+        generateBtnDesktop.innerHTML = '<i class="fas fa-magic"></i> 生成圖片！';
+      }
     }
   }
 

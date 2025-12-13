@@ -24,13 +24,26 @@ block content
               .mb-3.mb-md-4
                 label.form-label.h6.h5-md(for="wordInput") 
                   | 🔤 請輸入英文單字或句子：
-                .input-group.input-group-lg
-                  input#wordInput.form-control.form-control-lg(
+                
+                // 手機版：輸入框和按鈕分開排列
+                .d-block.d-sm-none
+                  input#wordInput.form-control.form-control-lg.mb-3(
                     type="text" 
                     placeholder="例如：apple, I am happy..."
                     required
                   )
-                  button#generateBtn.btn.btn-success.btn-lg.px-2.px-md-3(type="submit")
+                  .d-grid
+                    button#generateBtn.btn.btn-success.btn-lg(type="submit")
+                      span 🎨 生成圖片！
+                
+                // 平板和桌面版：輸入框和按鈕在同一排
+                .input-group.input-group-lg.d-none.d-sm-flex
+                  input#wordInputDesktop.form-control.form-control-lg(
+                    type="text" 
+                    placeholder="例如：apple, I am happy..."
+                    required
+                  )
+                  button#generateBtnDesktop.btn.btn-success.btn-lg.px-2.px-md-3(type="submit")
                     i.fas.fa-magic.d-none.d-sm-inline
                     span.d-sm-none 🎨
                     span.d-none.d-sm-inline  生成圖片！
@@ -101,7 +114,7 @@ block content
       
       .col-12.col-lg-4.order-2.order-lg-2
         // 結果區域
-        .card.border-primary.shadow.h-100
+        .card.border-primary.shadow
           .card-header.bg-primary.text-white.text-center.py-2.py-md-3
             h6.h5-md.mb-0
               | 🖼️ 你的圖片
@@ -120,14 +133,10 @@ block content
                   .row.g-1.g-md-2
                     .col-6
                       button#pronounceBtn.btn.btn-primary.btn-sm.w-100.py-1.py-md-2(type="button")
-                        i.fas.fa-volume-up.me-1.d-none.d-sm-inline
-                        span.d-sm-none 🔊
-                        span.d-none.d-sm-inline 發音
+                        span 🔊 發音
                     .col-6
                       button#practiceBtn.btn.btn-warning.btn-sm.w-100.py-1.py-md-2(type="button" style="display: none")
-                        i.fas.fa-microphone.me-1.d-none.d-sm-inline
-                        span.d-sm-none 🎤
-                        span.d-none.d-sm-inline 練習
+                        span 🎤 練習
                 
                 // 練習發音結果
                 .practice-result.mt-2#practiceResult(style="display: none")
@@ -142,15 +151,13 @@ block content
               
               .d-grid
                 a#downloadLink.btn.btn-outline-success.btn-sm(download="my-word-image.png")
-                  i.fas.fa-download.me-1.me-md-2
-                  span.d-none.d-sm-inline 下載圖片
-                  span.d-sm-none 下載
+                  span 📥 下載圖片
             
             // 佔位符
             .placeholder-content#placeholderContent
-              .text-center.text-muted.py-3.py-md-5
-                i.fas.fa-image.fa-2x.fa-md-4x.mb-2.mb-md-3.text-light
-                h6.h5-md 你的圖片會出現在這裡
+              .text-center.text-muted.py-3
+                i.fas.fa-image.fa-2x.mb-2.text-light
+                h6 你的圖片會出現在這裡
                 p.small 輸入單字後點擊「生成圖片」
         
         // 最近的內容
@@ -159,8 +166,8 @@ block content
             h6.mb-0.small
               | 📚 最近學過的內容
           .card-body.p-2.p-md-3
-            .small#recentWords
-              p.text-muted.text-center.mb-0 還沒有學過的內容
+            #recentWords
+              p.text-muted.text-center.mb-0.small 還沒有學過的內容
 
   // 兒童友善響應式樣式
   style.
@@ -205,137 +212,154 @@ block content
       padding: 12px 20px;
     }
     
-    /* 小朋友專用 - 手機版樣式 (< 576px) - 超高優先級 */
+    /* 小朋友專用 - 手機版樣式 (< 576px) - 適中大小 */
     @media (max-width: 575.98px) {
       body {
-        font-size: 120px !important; /* 基礎字體放大4倍 (30px * 4) */
+        font-size: 16px !important;
       }
       
       .container-fluid {
-        padding-left: 15px;
-        padding-right: 15px;
+        padding-left: 12px;
+        padding-right: 12px;
       }
       
       /* 手機版布局優化 - 圖片區域在下方 */
       .order-2 {
-        margin-top: 25px; /* 增加上方間距適應更大字體 */
+        margin-top: 15px;
       }
       
       .card {
-        border-radius: 15px;
-        border-width: 4px;
+        border-radius: 12px;
+        border-width: 2px;
       }
       
       .card-header h3 {
-        font-size: 8rem !important; /* 放大4倍 (2rem * 4) */
-        line-height: 1.1;
-      }
-      
-      #wordInput {
-        font-size: 120px !important; /* 放大4倍 (30px * 4) */
-        border-radius: 20px;
-        padding: 30px 40px;
-        min-height: 150px; /* 大幅增加高度適應超大字體 */
-        border-width: 6px;
-      }
-      
-      #generateBtn {
-        border-radius: 20px;
-        min-width: 150px;
-        min-height: 150px; /* 大幅增加高度適應超大字體 */
-        font-size: 100px; /* 放大4倍 (25px * 4) */
-        font-weight: 700;
-        padding: 30px 50px;
-      }
-      
-      .form-check-label {
-        font-size: 100px !important; /* 放大4倍 (25px * 4) */
-        font-weight: 600;
+        font-size: 1.4rem !important;
         line-height: 1.2;
       }
       
+      #wordInput {
+        font-size: 18px !important;
+        border-radius: 15px;
+        padding: 14px 18px;
+        min-height: 52px;
+        border-width: 3px;
+        width: 100% !important;
+        text-align: center;
+        font-weight: 500;
+      }
+      
+      #generateBtn {
+        border-radius: 15px;
+        width: 100% !important;
+        min-height: 52px;
+        font-size: 18px;
+        font-weight: 700;
+        padding: 14px 20px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border: none;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      }
+      
+      #generateBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+      }
+      
+      .form-check-label {
+        font-size: 14px !important;
+        font-weight: 500;
+        line-height: 1.3;
+      }
+      
       .form-check-input {
-        width: 6em !important; /* 放大4倍 (1.5 * 4) */
-        height: 6em !important; /* 放大4倍 (1.5 * 4) */
-        margin-top: 0.3em !important;
+        width: 1.3em !important;
+        height: 1.3em !important;
+        margin-top: 0.2em !important;
       }
       
       .btn-sm {
-        min-height: 120px !important; /* 放大4倍 (30px * 4) */
-        font-size: 80px !important; /* 放大4倍 (20px * 4) */
-        padding: 30px 40px !important;
+        min-height: 40px !important;
+        font-size: 14px !important;
+        padding: 8px 12px !important;
       }
       
       .alert h5 {
-        font-size: 8rem !important; /* 放大4倍 (2rem * 4) */
+        font-size: 1.3rem !important;
       }
       
       .alert p {
-        font-size: 6rem !important; /* 放大4倍 (1.5rem * 4) */
+        font-size: 14px !important;
       }
       
       .recent-word-item {
-        padding: 30px !important;
-        font-size: 100px !important; /* 放大4倍 (25px * 4) */
-        border-radius: 20px !important;
-        margin-bottom: 20px !important;
-        min-height: 120px !important; /* 大幅增加高度適應超大字體 */
-        display: flex;
-        align-items: center;
+        padding: 8px 10px !important;
+        font-size: 13px !important;
+        border-radius: 6px !important;
+        margin-bottom: 6px !important;
+        min-height: 36px !important;
+      }
+      
+      .recent-word-item .fw-bold {
+        font-size: 13px !important;
+      }
+      
+      .recent-word-item small {
+        font-size: 10px !important;
       }
     }
     
     /* 小朋友專用 - 平板版樣式 (576px - 991px) */
     @media (min-width: 576px) and (max-width: 991.98px) {
       body {
-        font-size: 22px; /* 放大 30% (17px * 1.3) */
+        font-size: 17px;
       }
       
       .card {
-        border-radius: 15px;
-        border-width: 3px;
+        border-radius: 14px;
+        border-width: 2px;
       }
       
       /* 平板版布局優化 - 圖片區域在下方 */
       .order-2 {
-        margin-top: 20px; /* 增加上方間距 */
+        margin-top: 16px;
       }
       
       .card-header h3 {
-        font-size: 1.95rem !important; /* 放大 30% (1.5 * 1.3) */
+        font-size: 1.6rem !important;
       }
       
-      #wordInput {
-        font-size: 25px; /* 放大 30% (19px * 1.3) */
-        padding: 14px 18px;
-        min-height: 52px;
+      #wordInputDesktop {
+        font-size: 19px;
+        padding: 12px 16px;
+        min-height: 50px;
       }
       
-      #generateBtn {
-        min-height: 52px;
-        font-size: 22px; /* 放大 30% (17px * 1.3) */
-        padding: 14px 22px;
+      #generateBtnDesktop {
+        min-height: 50px;
+        font-size: 17px;
+        padding: 12px 20px;
       }
       
       .form-check-label {
-        font-size: 21px; /* 放大 30% (16px * 1.3) */
+        font-size: 16px;
         font-weight: 500;
       }
       
       .form-check-input {
-        width: 1.6em;
-        height: 1.6em;
+        width: 1.4em;
+        height: 1.4em;
       }
       
       .btn-sm {
-        min-height: 44px !important;
+        min-height: 42px !important;
         font-size: 15px !important;
       }
       
       .recent-word-item {
         padding: 10px;
-        font-size: 20px; /* 放大 30% (15px * 1.3) */
-        min-height: 44px;
+        font-size: 16px;
+        min-height: 42px;
       }
     }
     
@@ -427,7 +451,7 @@ block content
                   linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
       background-size: 18px 18px;
       background-position: 0 0, 0 9px, 9px -9px, -9px 0px;
-      min-height: 220px;
+      min-height: 150px;
     }
     
     .word-info {
@@ -443,22 +467,32 @@ block content
     
     .recent-word-item {
       background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-      border: 2px solid #dee2e6;
-      border-radius: 10px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 15px;
-      font-weight: 500;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
+      font-size: 13px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .recent-word-item:hover {
       background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       border-color: #28a745;
+    }
+    
+    .recent-word-item .fw-bold {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.2;
+    }
+    
+    .recent-word-item small {
+      font-size: 11px;
+      line-height: 1.1;
     }
     
     /* 小朋友專用 - 手機版圖片樣式 */
@@ -477,7 +511,7 @@ block content
       
       .placeholder-content {
         border-width: 4px;
-        min-height: 200px;
+        min-height: 120px;
         background-size: 20px 20px;
         border-radius: 18px;
       }
@@ -489,27 +523,27 @@ block content
       }
       
       .word-info h5 {
-        font-size: 4.6rem !important; /* 放大2倍 (2.3 * 2) */
-        font-weight: 700;
+        font-size: 1.3rem !important;
+        font-weight: 600;
       }
       
       .word-info p {
-        font-size: 3.6rem !important; /* 放大2倍 (1.8 * 2) */
-        font-weight: 500;
+        font-size: 14px !important;
+        font-weight: 400;
       }
       
       .spinner-border {
-        width: 5rem; /* 放大2倍 (2.5 * 2) */
-        height: 5rem; /* 放大2倍 (2.5 * 2) */
+        width: 1.5rem;
+        height: 1.5rem;
       }
       
       .recent-word-item {
-        padding: 24px 28px;
-        font-size: 58px; /* 放大2倍 (29px * 2) */
-        border-radius: 18px;
-        margin-bottom: 20px;
-        border-width: 4px;
-        min-height: 100px; /* 大幅增加高度適應更大字體 */
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border-width: 2px;
+        min-height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -531,7 +565,7 @@ block content
       }
       
       .placeholder-content {
-        min-height: 210px;
+        min-height: 140px;
         border-radius: 16px;
       }
       
@@ -541,18 +575,26 @@ block content
       }
       
       .word-info h5 {
-        font-size: 1.7rem !important; /* 放大 30% (1.3 * 1.3) */
+        font-size: 1.4rem !important;
       }
       
       .word-info p {
-        font-size: 1.3rem !important; /* 放大 30% (1.0 * 1.3) */
+        font-size: 15px !important;
       }
       
       .recent-word-item {
-        padding: 12px 14px;
-        font-size: 21px; /* 放大 30% (16px * 1.3) */
-        border-radius: 11px;
-        min-height: 48px;
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 8px;
+        min-height: 40px;
+      }
+      
+      .recent-word-item .fw-bold {
+        font-size: 15px !important;
+      }
+      
+      .recent-word-item small {
+        font-size: 12px !important;
       }
     }
     
@@ -567,7 +609,7 @@ block content
         border-width: 3px;
         border-radius: 18px;
         background-size: 22px 22px;
-        min-height: 300px;
+        min-height: 180px;
       }
       
       .word-info {
@@ -576,9 +618,17 @@ block content
       
       .recent-word-item {
         padding: 10px 12px;
-        border-radius: 10px;
-        font-size: 15px;
-        min-height: 44px;
+        border-radius: 8px;
+        font-size: 14px;
+        min-height: 42px;
+      }
+      
+      .recent-word-item .fw-bold {
+        font-size: 15px !important;
+      }
+      
+      .recent-word-item small {
+        font-size: 12px !important;
       }
     }
     
@@ -673,68 +723,56 @@ block content
       }
     }
     
-    /* 強制手機版超大字體 - 最高優先級 - 覆蓋Bootstrap */
+    /* 手機版字體優化 - 適中大小 */
     @media screen and (max-width: 575.98px) {
-      /* 重置Bootstrap的字體設定 */
-      * {
-        font-size: inherit !important;
-      }
       html, body {
-        font-size: 120px !important;
-      }
-      
-      .container-fluid * {
-        font-size: inherit !important;
+        font-size: 16px !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', sans-serif !important;
       }
       
       #wordInput {
-        font-size: 120px !important;
-        min-height: 150px !important;
-        padding: 30px 40px !important;
-        border-width: 6px !important;
+        font-size: 18px !important;
+        min-height: 48px !important;
+        padding: 12px 16px !important;
+        border-width: 2px !important;
       }
       
       #generateBtn {
-        font-size: 100px !important;
-        min-height: 150px !important;
-        padding: 30px 50px !important;
+        font-size: 16px !important;
+        min-height: 48px !important;
+        padding: 12px 20px !important;
       }
       
       .card-header h3 {
-        font-size: 8rem !important;
+        font-size: 1.4rem !important;
       }
       
       .form-check-label {
-        font-size: 100px !important;
+        font-size: 14px !important;
       }
       
       .btn-sm {
-        font-size: 80px !important;
-        min-height: 120px !important;
+        font-size: 14px !important;
+        min-height: 40px !important;
       }
       
       .alert h5 {
-        font-size: 8rem !important;
+        font-size: 1.3rem !important;
       }
       
       .alert p {
-        font-size: 6rem !important;
+        font-size: 14px !important;
       }
       
-      .recent-word-item {
-        font-size: 100px !important;
-        min-height: 120px !important;
-        padding: 30px !important;
-      }
+
     }
 
 block scripts
+  script(src="/js/mobile-font-fix.js")
   script(src="/js/kids-vocabulary.js")
   script.
     // 頁面載入動畫
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🌟 Kids Vocabulary Generator loaded');
-      
       // 簡單的歡迎動畫
       setTimeout(() => {
         const welcome = document.getElementById('welcomeMessage');
