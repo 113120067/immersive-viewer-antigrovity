@@ -1,11 +1,11 @@
 extends layout
 
 block content
-  .container-fluid.px-2.px-md-3.mt-2.mt-md-4
-    .row.g-2.g-md-3.justify-content-center
+  .container-fluid.p-0
+    .row.g-0.justify-content-center
       .col-12.col-lg-8.order-1.order-lg-1
         // 主要區域
-        .card.border-success.shadow.h-100
+        .card.border-success.h-100
           .card-header.bg-success.text-white.text-center.py-2.py-md-3
             h3.mb-0.fs-4.fs-md-3
               | 🌟 小學生英文學習圖片生成器 🌟
@@ -111,7 +111,7 @@ block content
       
       .col-12.col-lg-4.order-2.order-lg-2
         // 結果區域
-        .card.border-primary.shadow
+        .card.border-primary
           .card-header.bg-primary.text-white.text-center.py-2.py-md-3
             h6.h5-md.mb-0
               | 🖼️ 你的圖片
@@ -158,7 +158,7 @@ block content
                 p.small 輸入單字後點擊「生成圖片」
         
         // 最近的內容
-        .card.mt-2.mt-md-3.border-info
+        .card.mt-1.border-info
           .card-header.bg-info.text-white.text-center.py-2
             h6.mb-0.small
               | 📚 最近學過的內容
@@ -172,6 +172,48 @@ block content
       background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
       min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* 全畫面布局 - 手機和平板 */
+    @media (max-width: 991.98px) {
+      .container-fluid {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      
+      .row {
+        margin: 0 !important;
+      }
+      
+      .col-12 {
+        padding: 0 !important;
+      }
+      
+      .card {
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        margin-bottom: 0 !important;
+      }
+      
+      .card:first-child {
+        border-top: none !important;
+      }
+      
+      .card:last-child {
+        border-bottom: none !important;
+      }
+      
+      .card-body {
+        padding: 12px !important;
+      }
+      
+      .card-header {
+        padding: 8px 12px !important;
+        border-radius: 0 !important;
+      }
     }
     
     .card {
@@ -209,58 +251,39 @@ block content
       padding: 12px 20px;
     }
     
-    /* 小朋友專用 - 手機版樣式 (< 576px) - 適中大小 */
+    /* 手機版全畫面樣式 (< 576px) */
     @media (max-width: 575.98px) {
       body {
         font-size: 16px !important;
       }
       
-      .container-fluid {
-        padding-left: 12px;
-        padding-right: 12px;
-      }
-      
-      /* 手機版布局優化 - 圖片區域在下方 */
-      .order-2 {
-        margin-top: 15px;
-      }
-      
-      .card {
-        border-radius: 12px;
-        border-width: 2px;
-      }
-      
       .card-header h3 {
-        font-size: 1.4rem !important;
+        font-size: 1.3rem !important;
         line-height: 1.2;
+        margin: 0 !important;
       }
       
       #wordInput {
         font-size: 18px !important;
-        border-radius: 15px;
-        padding: 14px 18px;
-        min-height: 52px;
-        border-width: 3px;
+        border-radius: 8px;
+        padding: 14px 16px;
+        min-height: 50px;
+        border-width: 2px;
         width: 100% !important;
         text-align: center;
         font-weight: 500;
       }
       
       #generateBtn {
-        border-radius: 15px;
+        border-radius: 8px;
         width: 100% !important;
-        min-height: 52px;
+        min-height: 50px;
         font-size: 18px;
         font-weight: 700;
         padding: 14px 20px;
         background: linear-gradient(135deg, #28a745, #20c997);
         border: none;
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-      }
-      
-      #generateBtn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        margin-top: 8px;
       }
       
       .form-check-label {
@@ -276,25 +299,33 @@ block content
       }
       
       .btn-sm {
-        min-height: 40px !important;
-        font-size: 14px !important;
+        min-height: 38px !important;
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+      }
+      
+      .alert {
+        margin-bottom: 8px !important;
         padding: 8px 12px !important;
       }
       
       .alert h5 {
-        font-size: 1.3rem !important;
+        font-size: 1.2rem !important;
+        margin-bottom: 4px !important;
       }
       
       .alert p {
-        font-size: 14px !important;
+        font-size: 13px !important;
+        margin-bottom: 0 !important;
       }
       
       .recent-word-item {
         padding: 8px 10px !important;
         font-size: 13px !important;
-        border-radius: 6px !important;
-        margin-bottom: 6px !important;
+        border-radius: 4px !important;
+        margin-bottom: 4px !important;
         min-height: 36px !important;
+        border-width: 1px !important;
       }
       
       .recent-word-item .fw-bold {
@@ -304,42 +335,59 @@ block content
       .recent-word-item small {
         font-size: 10px !important;
       }
+      
+      /* 圖片區域優化 */
+      #generatedImage {
+        max-height: 250px !important;
+        width: 100% !important;
+        border-radius: 8px !important;
+        border-width: 2px !important;
+      }
+      
+      .word-info {
+        padding: 8px 10px !important;
+        border-radius: 6px !important;
+        border-width: 2px !important;
+      }
+      
+      .word-info h5 {
+        font-size: 1.2rem !important;
+        margin-bottom: 4px !important;
+      }
+      
+      .word-info p {
+        font-size: 12px !important;
+        margin-bottom: 0 !important;
+      }
     }
     
-    /* 小朋友專用 - 平板版樣式 (576px - 991px) */
+    /* 平板版全畫面樣式 (576px - 991px) */
     @media (min-width: 576px) and (max-width: 991.98px) {
       body {
         font-size: 17px;
       }
       
-      .card {
-        border-radius: 14px;
-        border-width: 2px;
-      }
-      
-      /* 平板版布局優化 - 圖片區域在下方 */
-      .order-2 {
-        margin-top: 16px;
-      }
-      
       .card-header h3 {
-        font-size: 1.6rem !important;
+        font-size: 1.5rem !important;
+        margin: 0 !important;
       }
       
       #wordInputDesktop {
         font-size: 19px;
         padding: 12px 16px;
-        min-height: 50px;
+        min-height: 48px;
+        border-radius: 8px;
       }
       
       #generateBtnDesktop {
-        min-height: 50px;
+        min-height: 48px;
         font-size: 17px;
         padding: 12px 20px;
+        border-radius: 8px;
       }
       
       .form-check-label {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 500;
       }
       
@@ -349,14 +397,42 @@ block content
       }
       
       .btn-sm {
-        min-height: 42px !important;
-        font-size: 15px !important;
+        min-height: 40px !important;
+        font-size: 14px !important;
+      }
+      
+      .alert {
+        margin-bottom: 10px !important;
+        padding: 10px 12px !important;
       }
       
       .recent-word-item {
-        padding: 10px;
-        font-size: 16px;
-        min-height: 42px;
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 6px;
+        min-height: 38px;
+        margin-bottom: 6px;
+        border-width: 1px !important;
+      }
+      
+      /* 圖片區域優化 */
+      #generatedImage {
+        max-height: 300px !important;
+        width: 100% !important;
+        border-radius: 8px !important;
+      }
+      
+      .word-info {
+        padding: 10px 12px !important;
+        border-radius: 6px !important;
+      }
+      
+      .word-info h5 {
+        font-size: 1.3rem !important;
+      }
+      
+      .word-info p {
+        font-size: 13px !important;
       }
     }
     
@@ -440,15 +516,25 @@ block content
     }
     
     .placeholder-content {
-      border: 3px dashed #28a745;
-      border-radius: 15px;
+      border: 2px dashed #28a745;
+      border-radius: 8px;
       background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
                   linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
                   linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
                   linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
-      background-size: 18px 18px;
-      background-position: 0 0, 0 9px, 9px -9px, -9px 0px;
-      min-height: 150px;
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      min-height: 120px;
+    }
+    
+    /* 全畫面模式下的佔位符 */
+    @media (max-width: 991.98px) {
+      .placeholder-content {
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        min-height: 100px !important;
+      }
     }
     
     .word-info {
@@ -492,47 +578,7 @@ block content
       line-height: 1.1;
     }
     
-    /* 小朋友專用 - 手機版圖片樣式 */
-    @media (max-width: 575.98px) {
-      #generatedImage {
-        max-height: 320px; /* 增加圖片高度 */
-        border-width: 3px !important;
-        border-radius: 15px;
-        width: 100%; /* 確保圖片寬度充滿容器 */
-      }
-      
-      /* 圖片區域卡片優化 */
-      .order-2 .card {
-        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important; /* 增強陰影效果 */
-      }
-      
-      .placeholder-content {
-        border-width: 4px;
-        min-height: 120px;
-        background-size: 20px 20px;
-        border-radius: 18px;
-      }
-      
-      .word-info {
-        border-width: 3px;
-        border-radius: 15px;
-        padding: 16px !important;
-      }
-      
-      .word-info h5 {
-        font-size: 1.3rem !important;
-        font-weight: 600;
-      }
-      
-      .word-info p {
-        font-size: 14px !important;
-        font-weight: 400;
-      }
-      
-      .spinner-border {
-        width: 1.5rem;
-        height: 1.5rem;
-      }
+
       
       .recent-word-item {
         padding: 10px 12px;
@@ -547,53 +593,7 @@ block content
         text-align: center;
       }
     }
-    
-    /* 平板版圖片樣式 */
-    @media (min-width: 576px) and (max-width: 991.98px) {
-      #generatedImage {
-        max-height: 350px; /* 增加圖片高度 */
-        border-radius: 14px;
-        width: 100%; /* 確保圖片寬度充滿容器 */
-      }
-      
-      /* 圖片區域卡片優化 */
-      .order-2 .card {
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important; /* 增強陰影效果 */
-      }
-      
-      .placeholder-content {
-        min-height: 140px;
-        border-radius: 16px;
-      }
-      
-      .word-info {
-        border-radius: 14px;
-        padding: 14px !important;
-      }
-      
-      .word-info h5 {
-        font-size: 1.4rem !important;
-      }
-      
-      .word-info p {
-        font-size: 15px !important;
-      }
-      
-      .recent-word-item {
-        padding: 10px 12px;
-        font-size: 14px;
-        border-radius: 8px;
-        min-height: 40px;
-      }
-      
-      .recent-word-item .fw-bold {
-        font-size: 15px !important;
-      }
-      
-      .recent-word-item small {
-        font-size: 12px !important;
-      }
-    }
+
     
     /* 桌面版圖片樣式 */
     @media (min-width: 992px) {

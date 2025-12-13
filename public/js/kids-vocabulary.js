@@ -335,8 +335,21 @@ class KidsVocabularyGenerator {
     // 儲存當前輸入（單字或句子）
     this.currentWord = input;
     
-    // 使用延遲載入策略，圖片載入完成後才發音
-    this.loadImageWithFallback(imageElement, input, data.imageUrl);
+    // 簡化圖片載入邏輯
+    console.log('🖼️ 開始載入圖片:', data.imageUrl);
+    imageElement.onload = () => {
+      console.log('✅ 圖片載入成功');
+      // 圖片載入成功後觸發發音
+      this.handlePronunciation(input);
+    };
+    
+    imageElement.onerror = () => {
+      console.error('❌ 圖片載入失敗');
+      imageElement.alt = `${input} 的圖片載入失敗`;
+    };
+    
+    imageElement.src = data.imageUrl;
+    imageElement.alt = `${input} 的圖片`;
 
     // 設置內容資訊
     const wordCount = input.trim().split(/\s+/).length;
