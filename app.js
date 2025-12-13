@@ -105,6 +105,10 @@ app.get('/test-kids-friendly.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-kids-friendly.html'));
 });
 
+app.get('/test-speech-layout.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-speech-layout.html'));
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

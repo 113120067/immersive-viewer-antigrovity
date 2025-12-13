@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>語音功能布局測試</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        .test-info {
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-3">
+        <div class="test-info">
+            <h2>🎵 語音功能布局測試</h2>
+            <p>測試語音功能是否已移到獨立框框並放在最下方</p>
+            <a href="/kids-vocabulary" class="btn btn-primary">查看主頁面</a>
+        </div>
+        
+        <div class="alert alert-info">
+            <h5>📋 測試檢查項目：</h5>
+            <ul class="text-start">
+                <li>✅ 語音功能已從主輸入區域移除</li>
+                <li>✅ 語音功能放在獨立的黃色框框中</li>
+                <li>✅ 語音功能框框位於頁面最下方</li>
+                <li>✅ 包含：自動發音、練習發音、播放速度</li>
+                <li>✅ 在手機和桌面版都能正常顯示</li>
+            </ul>
+        </div>
+        
+        <div class="alert alert-success">
+            <h5>🎯 預期效果：</h5>
+            <p>主輸入區域更簡潔，語音功能集中在底部的專用區域，提升用戶體驗</p>
+        </div>
+    </div>
+</body>
+</html>
