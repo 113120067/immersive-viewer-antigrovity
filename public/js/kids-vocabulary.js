@@ -398,12 +398,12 @@ class KidsVocabularyGenerator {
     // 加入 seed 參數來確保輸出一致性，利用快取
     const seed = this.generateSeed(input);
 
-    // 🔒 安全性更新：
-    // 1. safe=true: 啟用 API 層級的 NSFW 過濾
+    // 🔒 安全性更新 (策略調整: Option B):
+    // 1. safe=false: 移除 API 強制過濾，避免錯誤攔截正常單字 (如 Flower)
     // 2. nologo=true: 移除可能的浮水印
-    // 3. negative=Prompt: 明確排除不當內容 (增強安全性，減少誤判)
+    // 3. negative=Prompt: 改用強力反向提示詞來過濾不當內容
     const negativePrompt = encodeURIComponent('nudity, violence, blood, guns, weapons, adult content, text, watermark');
-    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&model=flux&enhance=true&seed=${seed}&safe=true&nologo=true&negative=${negativePrompt}`;
+    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&model=flux&enhance=true&seed=${seed}&nologo=true&negative=${negativePrompt}`;
   }
 
   showResult(data, input) {
@@ -475,7 +475,7 @@ class KidsVocabularyGenerator {
 
           imageElement.alt = `${input} 的圖片載入失敗`;
           imageElement.alt = `${input} 的圖片載入失敗`;
-          this.showError('圖片載入失敗。如果在「安全模式」下某些單字(如 flower)一直失敗，可能是被 AI 誤判為不適合兒童，請嘗試更具體的描述(如 red flower)！');
+          this.showError('圖片載入失敗。如果重複嘗試仍失敗，可能是內容被 AI 判定為敏感詞，請嘗試換個說法或是輸入其他單字！');
         }
       };
 
