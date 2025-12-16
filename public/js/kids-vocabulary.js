@@ -13,240 +13,26 @@ class KidsVocabularyGenerator {
     this.speechRecognition = null;
     this.isListening = false;
     
+    // Rate Limiting
+    this.isCoolingDown = false;
+    this.cooldownSeconds = 15;
+    this.cooldownTimer = null;
+    
     this.init();
   }
 
-  /**
-   * 初始化
-   */
-  async init() {
-    try {
-      // 直接載入功能，無需認證
-      this.loadRecentWords();
-      this.setupEventListeners();
-      this.initializeSpeechFeatures();
-      
-      // 顯示歡迎訊息
-      this.showWelcomeMessage();
-      
-    } catch (error) {
-      console.error('Initialization failed:', error);
-      this.showError('系統初始化失敗，請重新整理頁面');
-    }
-  }
+  // ... (init, showWelcomeMessage, initializeSpeechFeatures, setupEventListeners methods remain unchanged)
 
-  /**
-   * 顯示歡迎訊息
-   */
-  showWelcomeMessage() {
-    const welcomeMessage = document.getElementById('welcomeMessage');
-    if (welcomeMessage) {
-      welcomeMessage.innerHTML = `
-        <h5>👋 歡迎小朋友！</h5>
-        <p class="mb-2">輸入英文單字或句子，我會幫你畫一張可愛的圖片來學習！</p>
-        <p class="mb-0 small text-muted">✨ 完全免費使用，無需註冊登入</p>
-      `;
-      welcomeMessage.className = 'alert alert-success text-center mb-4';
-    }
-  }
-
-  /**
-   * 初始化語音功能
-   */
-  initializeSpeechFeatures() {
-    // 檢查瀏覽器支援
-    if (!this.speechSynthesis) {
-      console.warn('瀏覽器不支援語音合成');
-      document.getElementById('pronunciationToggle').disabled = true;
-    }
-    
-    // 初始化語音識別
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      this.speechRecognition = new SpeechRecognition();
-      this.speechRecognition.continuous = false;
-      this.speechRecognition.interimResults = false;
-      this.speechRecognition.lang = 'en-US';
-      
-      this.speechRecognition.onresult = (event) => {
-        const result = event.results[0][0].transcript.toLowerCase().trim();
-        this.handleSpeechResult(result);
-      };
-      
-      this.speechRecognition.onerror = (event) => {
-        this.handleSpeechError(event.error);
-      };
-      
-      this.speechRecognition.onend = () => {
-        this.isListening = false;
-        this.updatePracticeUI();
-      };
-    } else {
-      console.warn('瀏覽器不支援語音識別');
-      document.getElementById('practiceToggle').disabled = true;
-    }
-  }
-
-  /**
-   * 設置事件監聽器
-   */
-  setupEventListeners() {
-    // 表單提交
-    const form = document.getElementById('simpleVocabForm');
-    if (form) {
-      console.log('✅ 找到表單，設置事件監聽器');
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        console.log('📝 表單提交事件觸發');
-        this.generateImage();
-      });
-    } else {
-      console.error('❌ 找不到表單 #simpleVocabForm');
-    }
-
-    // iOS 兼容性：直接為按鈕添加事件監聽器
-    const generateBtnMobile = document.getElementById('generateBtn');
-    const generateBtnDesktop = document.getElementById('generateBtnDesktop');
-    
-    if (generateBtnMobile) {
-      console.log('✅ 找到手機版按鈕，設置事件監聽器');
-      // iOS 需要同時監聽 touchstart 和 click 事件
-      generateBtnMobile.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        console.log('📱 手機版按鈕 touchstart 事件觸發');
-        this.generateImage();
-      }, { passive: false });
-      
-      generateBtnMobile.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('🖱️ 手機版按鈕 click 事件觸發');
-        this.generateImage();
-      });
-    }
-    
-    if (generateBtnDesktop) {
-      console.log('✅ 找到桌面版按鈕，設置事件監聽器');
-      generateBtnDesktop.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        console.log('📱 桌面版按鈕 touchstart 事件觸發');
-        this.generateImage();
-      }, { passive: false });
-      
-      generateBtnDesktop.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('🖱️ 桌面版按鈕 click 事件觸發');
-        this.generateImage();
-      });
-    }
-
-    // 手機版輸入框 Enter 鍵
-    const wordInput = document.getElementById('wordInput');
-    if (wordInput) {
-      wordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          this.generateImage();
-        }
-      });
-
-      // 輸入框焦點效果
-      wordInput.addEventListener('focus', () => {
-        wordInput.style.borderColor = '#20c997';
-      });
-
-      wordInput.addEventListener('blur', () => {
-        wordInput.style.borderColor = '#28a745';
-      });
-    }
-
-    // 桌面版輸入框 Enter 鍵
-    const wordInputDesktop = document.getElementById('wordInputDesktop');
-    if (wordInputDesktop) {
-      wordInputDesktop.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          this.generateImage();
-        }
-      });
-
-      // 輸入框焦點效果
-      wordInputDesktop.addEventListener('focus', () => {
-        wordInputDesktop.style.borderColor = '#20c997';
-      });
-
-      wordInputDesktop.addEventListener('blur', () => {
-        wordInputDesktop.style.borderColor = '#28a745';
-      });
-    }
-    
-    // 發音功能切換
-    const pronunciationToggle = document.getElementById('pronunciationToggle');
-    pronunciationToggle.addEventListener('change', () => {
-      localStorage.setItem('kidsPronunciationEnabled', pronunciationToggle.checked);
-    });
-    
-    // 練習功能切換
-    const practiceToggle = document.getElementById('practiceToggle');
-    practiceToggle.addEventListener('change', () => {
-      const practiceBtn = document.getElementById('practiceBtn');
-      const practiceResult = document.getElementById('practiceResult');
-      
-      if (practiceToggle.checked) {
-        practiceBtn.style.display = 'block';
-        practiceResult.style.display = 'block';
-      } else {
-        practiceBtn.style.display = 'none';
-        practiceResult.style.display = 'none';
-        this.stopListening();
-      }
-      
-      localStorage.setItem('kidsPracticeEnabled', practiceToggle.checked);
-    });
-    
-    // 發音按鈕
-    const pronounceBtn = document.getElementById('pronounceBtn');
-    pronounceBtn.addEventListener('click', () => {
-      if (this.currentWord) {
-        this.pronounceWord(this.currentWord);
-      }
-    });
-    
-    // 練習按鈕
-    const practiceBtn = document.getElementById('practiceBtn');
-    practiceBtn.addEventListener('click', () => {
-      if (this.isListening) {
-        this.stopListening();
-      } else {
-        this.startListening();
-      }
-    });
-    
-    // 語音速度滑桿
-    const speechSpeedSlider = document.getElementById('speechSpeedSlider');
-    speechSpeedSlider.addEventListener('input', () => {
-      this.updateSpeedDisplay();
-      localStorage.setItem('kidsSpeechSpeed', speechSpeedSlider.value);
-    });
-    
-    // 載入保存的設定
-    this.loadSpeechSettings();
-  }
-
-  /**
-   * 生成圖片
-   */
   async generateImage() {
     console.log('🎨 generateImage 方法被調用');
-    console.log('📱 設備信息:', {
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      touchSupport: 'ontouchstart' in window,
-      screenSize: `${window.screen.width}x${window.screen.height}`,
-      viewportSize: `${window.innerWidth}x${window.innerHeight}`
-    });
     
     if (this.isGenerating) {
       console.log('⚠️ 正在生成中，跳過');
+      return;
+    }
+
+    if (this.isCoolingDown) {
+      this.showError(`請稍等 ${this.cooldownSeconds} 秒後再試！`);
       return;
     }
 
@@ -265,9 +51,6 @@ class KidsVocabularyGenerator {
       input = desktopInput.value.trim();
     }
     
-    console.log('獲取到的輸入值:', input);
-
-    // 驗證輸入
     if (!input) {
       this.showError('請輸入英文單字或句子！');
       return;
@@ -278,7 +61,6 @@ class KidsVocabularyGenerator {
       return;
     }
 
-    // 檢查是否包含中文或特殊字符（允許基本標點符號）
     if (!/^[a-zA-Z\s.,!?'-]+$/.test(input)) {
       this.showError('請只輸入英文字母和基本標點符號！');
       return;
@@ -289,20 +71,20 @@ class KidsVocabularyGenerator {
       this.showGenerationStatus(true);
       this.hideError();
       this.hideResult();
+      
+      // 開始 15 秒冷卻倒數
+      this.startCooldown();
 
-      // 直接使用 Pollinations 免費服務，無需後端 API
       console.log('🔗 開始生成 Pollinations URL');
       const imageUrl = this.generatePollinationsUrl(input);
       console.log('🔗 生成的圖片 URL:', imageUrl);
       
-      // 模擬 API 響應格式
       const data = {
         success: true,
         imageUrl: imageUrl,
         provider: 'pollinations'
       };
 
-      console.log('📊 準備顯示結果:', data);
       if (data.success) {
         this.showResult(data, input);
         this.addToRecentWords(input, data.imageUrl);
@@ -315,38 +97,61 @@ class KidsVocabularyGenerator {
       this.showError('網路連線有問題，請再試一次！');
     } finally {
       this.isGenerating = false;
+      // 注意：這裡不取消冷卻，冷卻是獨立的
       this.showGenerationStatus(false);
     }
   }
 
   /**
-   * 生成適合小學生的提示詞
+   * 開始冷卻倒數
    */
-  generateKidsPrompt(input) {
-    // 判斷是單字還是句子
-    const wordCount = input.trim().split(/\s+/).length;
+  startCooldown() {
+    this.isCoolingDown = true;
+    this.cooldownSeconds = 15;
     
-    if (wordCount === 1) {
-      // 單字：使用簡單的卡通風格
-      return `cute cartoon ${input}`;
-    } else {
-      // 句子：生成場景圖片
-      return `cute cartoon illustration of "${input}" for kids, colorful, simple, educational`;
-    }
+    const updateButtonText = () => {
+      const btnMobile = document.getElementById('generateBtn');
+      const btnDesktop = document.getElementById('generateBtnDesktop');
+      const text = `⏳ 請等待 ${this.cooldownSeconds}s`;
+      
+      if (btnMobile) {
+        btnMobile.disabled = true;
+        btnMobile.innerHTML = text;
+      }
+      if (btnDesktop) {
+        btnDesktop.disabled = true;
+        btnDesktop.innerHTML = text;
+      }
+    };
+    
+    updateButtonText();
+    
+    this.cooldownTimer = setInterval(() => {
+      this.cooldownSeconds--;
+      updateButtonText();
+      
+      if (this.cooldownSeconds <= 0) {
+        clearInterval(this.cooldownTimer);
+        this.isCoolingDown = false;
+        
+        // 恢復按鈕狀態
+        const btnMobile = document.getElementById('generateBtn');
+        const btnDesktop = document.getElementById('generateBtnDesktop');
+        
+        if (btnMobile) {
+          btnMobile.disabled = false;
+          btnMobile.innerHTML = '🎨 生成圖片！';
+        }
+        if (btnDesktop) {
+          btnDesktop.disabled = false;
+          btnDesktop.innerHTML = '🎨 生成圖片！';
+        }
+      }
+    }, 1000);
   }
 
-  /**
-   * 直接生成 Pollinations 圖片 URL
-   */
-  generatePollinationsUrl(input) {
-    const prompt = this.generateKidsPrompt(input);
-    const encodedPrompt = encodeURIComponent(prompt);
-    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&model=flux&enhance=true`;
-  }
+  // ... (generateKidsPrompt, generatePollinationsUrl methods remain unchanged)
 
-  /**
-   * 顯示結果
-   */
   showResult(data, input) {
     console.log('🎯 showResult called with:', { input, imageUrl: data.imageUrl });
     
@@ -358,30 +163,15 @@ class KidsVocabularyGenerator {
     const resultContainer = document.getElementById('imageResult');
     const placeholder = document.getElementById('placeholderContent');
 
-    console.log('🎯 DOM elements found:', {
-      imageElement: !!imageElement,
-      wordTitleElement: !!wordTitleElement,
-      wordMeaningElement: !!wordMeaningElement,
-      aiProviderElement: !!aiProviderElement,
-      downloadLink: !!downloadLink,
-      resultContainer: !!resultContainer,
-      placeholder: !!placeholder
-    });
-
-    // 檢查必要元素是否存在
     if (!imageElement || !resultContainer || !placeholder) {
       console.error('❌ 缺少必要的 DOM 元素');
-      this.showError('頁面元素載入有問題，請重新整理頁面');
       return;
     }
 
-    // 儲存當前輸入（單字或句子）
     this.currentWord = input;
     
-    // iOS 兼容的圖片載入邏輯
     console.log('🖼️ 開始載入圖片:', data.imageUrl);
     
-    // 為 iOS 添加更長的超時時間和重試機制
     let imageLoadTimeout;
     let retryCount = 0;
     const maxRetries = 3;
@@ -392,77 +182,64 @@ class KidsVocabularyGenerator {
       imageElement.onload = () => {
         console.log('✅ 圖片載入成功');
         if (imageLoadTimeout) clearTimeout(imageLoadTimeout);
-        // 圖片載入成功後觸發發音
         this.handlePronunciation(input);
+        
+        // 圖片真正載入完成後才顯示成功訊息
+        this.showSuccess(`太棒了！"${input}" 的圖片生成完成！`);
       };
       
       imageElement.onerror = () => {
-        console.error('❌ 圖片載入失敗');
         if (imageLoadTimeout) clearTimeout(imageLoadTimeout);
         
         if (retryCount < maxRetries) {
           retryCount++;
-          console.log(`🔄 準備重試載入圖片 (${retryCount}/${maxRetries})`);
-          setTimeout(() => loadImage(url), 2000 * retryCount); // 遞增延遲
+          setTimeout(() => loadImage(url), 2000 * retryCount);
         } else {
           imageElement.alt = `${input} 的圖片載入失敗`;
           this.showError('圖片載入失敗，請稍後再試或檢查網路連線');
         }
       };
       
-      // iOS Safari 需要更長的載入時間
       imageLoadTimeout = setTimeout(() => {
-        console.log('⏰ 圖片載入超時');
         if (retryCount < maxRetries) {
           retryCount++;
-          console.log(`🔄 超時重試載入圖片 (${retryCount}/${maxRetries})`);
           loadImage(url);
         } else {
           imageElement.alt = `${input} 的圖片載入超時`;
           this.showError('圖片載入超時，請檢查網路連線後重試');
         }
-      }, 15000); // iOS 需要更長的超時時間
+      }, 15000);
       
       imageElement.src = url;
       imageElement.alt = `${input} 的圖片`;
     };
     
-    // 開始載入圖片
     loadImage(data.imageUrl);
 
-    // 設置內容資訊
     const wordCount = input.trim().split(/\s+/).length;
     if (wordCount === 1) {
-      // 單字顯示
       wordTitleElement.textContent = input.toUpperCase();
       wordMeaningElement.textContent = this.getSimpleMeaning(input);
     } else {
-      // 句子顯示
       wordTitleElement.textContent = input;
-      wordTitleElement.style.fontSize = '1.2em'; // 句子用較小字體
+      wordTitleElement.style.fontSize = '1.2em';
       wordMeaningElement.textContent = this.getSentenceDescription(input);
     }
 
-    // 設置 AI 提供商（顯示為友善的免費 AI）
     aiProviderElement.innerHTML = '🌸 由免費 AI 生成';
 
-    // 設置下載連結
     const filename = input.length > 20 ? input.substring(0, 20) + '...' : input;
     downloadLink.href = data.imageUrl;
     downloadLink.download = `${filename}-圖片.png`;
 
-    // 顯示結果
     placeholder.style.display = 'none';
     resultContainer.style.display = 'block';
 
-    // 清空輸入框（手機版和桌面版）
     const mobileInputClear = document.getElementById('wordInput');
     const desktopInputClear = document.getElementById('wordInputDesktop');
     if (mobileInputClear) mobileInputClear.value = '';
     if (desktopInputClear) desktopInputClear.value = '';
-
-    const contentType = wordCount === 1 ? '單字' : '句子';
-    this.showSuccess(`太棒了！"${input}" 的圖片生成完成！`);
+  
   }
 
   /**

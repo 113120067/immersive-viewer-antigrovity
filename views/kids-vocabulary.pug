@@ -184,6 +184,60 @@ block content
                   span 慢
                   span 快
 
+      // 使用說明按鈕區域
+      .col-12.order-4.mt-3.mb-5.text-center
+        button.btn.btn-outline-info.rounded-pill.px-4(type="button" data-bs-toggle="modal" data-bs-target="#usageGuideModal")
+          i.fas.fa-question-circle.me-2
+          | 如何使用？(老師請看這裡)
+
+  // 使用說明 Modal
+  #usageGuideModal.modal.fade(tabindex="-1" aria-labelledby="usageGuideModalLabel" aria-hidden="true")
+    .modal-dialog.modal-dialog-scrollable.modal-lg
+      .modal-content.border-0.shadow-lg(style="border-radius: 20px;")
+        .modal-header.bg-success.text-white(style="border-radius: 20px 20px 0 0;")
+          h5#usageGuideModalLabel.modal-title 
+            i.fas.fa-book-reader.me-2
+            | 小學生單字圖片生成器 - 使用指南
+          button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal" aria-label="Close")
+        .modal-body.p-4
+          .alert.alert-warning.border-warning
+            h6.alert-heading.fw-bold 
+              i.fas.fa-exclamation-circle.me-2
+              | 🌟 重要提醒：15 秒魔法冷卻時間
+            p.mb-0 為了讓大家都能順利使用，AI 畫圖精靈每畫一張圖需要休息 **15 秒**。請等待按鈕上的倒數結束變回綠色後，再按下一張喔！
+
+          h6.fw-bold.text-success.mt-4 🏫 學校課堂使用建議 (給老師)
+          p 當全班使用同一個 WiFi 時，為了避免「塞車」，建議您：
+          ul.text-muted
+            li 
+              strong 🏃 分組接力賽：
+              | 讓第一排同學先按，過 20 秒換第二排，以此類推。
+            li 
+              strong 📶 分散網路：
+              | 如果可以，部分平板使用 WiFi，部分使用行動網路。
+            li 
+              strong 🛠️ 遇到錯誤時：
+              | 請小朋友「暫停動作，深呼吸」，等待約 1 分鐘後再試。
+
+          hr.my-4
+
+          h6.fw-bold.text-primary 👶 給小朋友的小叮嚀
+          ol.text-muted
+            li 
+              strong 要有耐心：
+              | 按下按鈕後，等它轉圈圈，不要一直按喔！
+            li 
+              strong 排隊守秩序：
+              | 聽老師的指揮，輪流生成圖片。
+            li 
+              strong 休息一下：
+              | 如果精靈不理你了，讓平板休息一分鐘就會恢復精神囉！
+              
+        .modal-footer.justify-content-center.border-top-0.pb-4
+          button.btn.btn-success.rounded-pill.px-5(type="button" data-bs-dismiss="modal") 
+            i.fas.fa-check.me-2
+            | 我知道了！
+
   // 兒童友善響應式樣式
   style.
     body {
