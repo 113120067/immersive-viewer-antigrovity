@@ -353,7 +353,8 @@ class KidsVocabularyGenerator {
 
 
             // 快取命中，快速冷卻
-            this.quickCooldown();
+            // 快速冷卻已由 showResult 處理
+
             this.isGenerating = false;
             this.showGenerationStatus(false);
             return; // Done!
