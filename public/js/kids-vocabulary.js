@@ -19,6 +19,39 @@ class KidsVocabularyGenerator {
     this.cooldownTimer = null;
 
     this.init();
+    this.isLoadingImage = false;
+  }
+
+  /**
+   * 更新按鈕狀態 (統一管理所有狀態邏輯)
+   */
+  updateButtonState() {
+    const btnMobile = document.getElementById('generateBtn');
+    const btnDesktop = document.getElementById('generateBtnDesktop');
+
+    // 決定按鈕文字和狀態
+    let isDisabled = false;
+    let buttonText = '🎨 生成圖片！';
+
+    if (this.isLoadingImage) {
+      isDisabled = true;
+      buttonText = '🎨 正在繪製中...';
+    } else if (this.isCoolingDown) {
+      isDisabled = true;
+      buttonText = `⏳ 請等待 ${this.cooldownSeconds}s`;
+    }
+
+    // 更新手機版按鈕
+    if (btnMobile) {
+      btnMobile.disabled = isDisabled;
+      btnMobile.innerHTML = buttonText;
+    }
+
+    // 更新桌面版按鈕
+    if (btnDesktop) {
+      btnDesktop.disabled = isDisabled;
+      btnDesktop.innerHTML = buttonText;
+    }
   }
 
   init() {
@@ -234,8 +267,8 @@ class KidsVocabularyGenerator {
     }
 
     // 1. 寬鬆的字元檢查：允許英文、數字、常見標點符號
-    // 允許的符號: . , ! ? ' " - ; : ( )
-    if (!/^[a-zA-Z0-9\s.,!?'";:()\-]+$/.test(input)) {
+    // 允許的符號: . , ! ? ' " - ; : ( ) 以及智慧型引號 ’ “ ”
+    if (!/^[a-zA-Z0-9\s.,!?'"’“”;:()\-]+$/.test(input)) {
       this.showError('請只輸入英文、數字和常見標點符號！');
       return;
     }
@@ -289,44 +322,18 @@ class KidsVocabularyGenerator {
   startCooldown() {
     this.isCoolingDown = true;
     this.cooldownSeconds = 15;
+    this.updateButtonState();
 
-    const updateButtonText = () => {
-      const btnMobile = document.getElementById('generateBtn');
-      const btnDesktop = document.getElementById('generateBtnDesktop');
-      const text = `⏳ 請等待 ${this.cooldownSeconds}s`;
-
-      if (btnMobile) {
-        btnMobile.disabled = true;
-        btnMobile.innerHTML = text;
-      }
-      if (btnDesktop) {
-        btnDesktop.disabled = true;
-        btnDesktop.innerHTML = text;
-      }
-    };
-
-    updateButtonText();
+    if (this.cooldownTimer) clearInterval(this.cooldownTimer);
 
     this.cooldownTimer = setInterval(() => {
       this.cooldownSeconds--;
-      updateButtonText();
+      this.updateButtonState();
 
       if (this.cooldownSeconds <= 0) {
         clearInterval(this.cooldownTimer);
         this.isCoolingDown = false;
-
-        // 恢復按鈕狀態
-        const btnMobile = document.getElementById('generateBtn');
-        const btnDesktop = document.getElementById('generateBtnDesktop');
-
-        if (btnMobile) {
-          btnMobile.disabled = false;
-          btnMobile.innerHTML = '🎨 生成圖片！';
-        }
-        if (btnDesktop) {
-          btnDesktop.disabled = false;
-          btnDesktop.innerHTML = '🎨 生成圖片！';
-        }
+        this.updateButtonState();
       }
     }, 1000);
   }
@@ -415,6 +422,10 @@ class KidsVocabularyGenerator {
 
     this.currentWord = input;
 
+    // 設定正在載入狀態
+    this.isLoadingImage = true;
+    this.updateButtonState();
+
     console.log('🖼️ 開始載入圖片:', data.imageUrl);
 
     // 記錄開始載入的時間，用於判斷是否為快取命中
@@ -430,6 +441,10 @@ class KidsVocabularyGenerator {
       imageElement.onload = () => {
         const loadTime = Date.now() - startTime;
         console.log(`✅ 圖片載入成功，耗時: ${loadTime}ms`);
+
+        // 載入完成，解除載入鎖定
+        this.isLoadingImage = false;
+        this.updateButtonState();
 
         if (imageLoadTimeout) clearTimeout(imageLoadTimeout);
         this.handlePronunciation(input);
@@ -452,6 +467,10 @@ class KidsVocabularyGenerator {
           retryCount++;
           setTimeout(() => loadImage(url), 2000 * retryCount);
         } else {
+          // 失敗也要解除鎖定
+          this.isLoadingImage = false;
+          this.updateButtonState();
+
           imageElement.alt = `${input} 的圖片載入失敗`;
           this.showError('圖片載入失敗，請稍後再試或檢查網路連線');
         }
