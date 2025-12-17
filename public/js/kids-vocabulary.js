@@ -363,7 +363,39 @@ class KidsVocabularyGenerator {
           console.log('⚠️ GitHub check failed or not found, generating new...');
         }
 
-        // If not found, call Backend to Generate & Save
+        // If not found, Validate Input First
+        console.log('📝 Validating input...');
+        let validationResult = { isValid: true };
+        try {
+          const valRes = await fetch('/kids-vocabulary/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ word: input })
+          });
+          validationResult = await valRes.json();
+        } catch (e) {
+          console.warn('Validation skipped due to offline/error');
+        }
+
+        if (validationResult.success && !validationResult.isValid) {
+          // Show Confirm Dialog
+          // Note: browser confirm() is blocking but simple. For better UI use custom modal.
+          // Using confirm() for now as per MVP plan.
+          const suggestion = validationResult.correction;
+          const msg = validationResult.message || `設計師小幫手覺得怪怪的 🤔\n\n您是不是要找：${suggestion}？\n\n按「確定」自動修正\n按「取消」堅持使用原字`;
+
+          if (suggestion && confirm(msg)) {
+            input = suggestion; // Auto correct
+            // Update UI input as well
+            if (mobileInput) mobileInput.value = input;
+            if (desktopInput) desktopInput.value = input;
+            this.showSuccess(`已自動修正為：${input}`);
+          } else {
+            // User rejected, keep original
+          }
+        }
+
+        // Call Backend to Generate & Save
         console.log('🚀 Requesting backend generation...');
         try {
           const backendRes = await fetch('/kids-vocabulary/generate', {

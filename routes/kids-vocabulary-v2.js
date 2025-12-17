@@ -27,6 +27,23 @@ router.post('/generate', async (req, res) => {
     }
 });
 
+/**
+ * POST /kids-v2/validate
+ * Check input for typos or validity
+ */
+router.post('/validate', async (req, res) => {
+    const { word } = req.body;
+    if (!word) return res.status(400).json({ success: false, error: 'Word is required' });
+
+    try {
+        const result = await service.validateInput(word);
+        res.json({ success: true, ...result });
+    } catch (error) {
+        // Fail open
+        res.json({ success: true, isValid: true });
+    }
+});
+
 const ghostCleanupService = require('../src/services/ghost-cleanup-service');
 
 /**

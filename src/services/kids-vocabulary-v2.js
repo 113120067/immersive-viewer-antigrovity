@@ -26,6 +26,54 @@ class KidsVocabularyV2Service {
 
 
     /**
+     * Validate Input using LLM (Designer Check)
+     * Returns { isValid: boolean, correction: string, type: 'word'|'sentence', message: string }
+     */
+    async validateInput(word) {
+        // Quick check for obvious nonsense (optional) or just pass to LLM
+        // System Prompt for Validation
+        const systemPrompt = `You are a helpful spellchecker for kids. 
+Check the input for spelling or grammar errors. 
+If it is a valid English word, phrase, sentence, or a well-known character/brand (e.g. Pikachu, Minecraft, Skibidi), return isValid: true.
+If it is a typo, return isValid: false and provide the correction.
+If it is Chinese or other language, translate it to English.
+
+Output JSON format ONLY:
+{
+  "isValid": boolean,
+  "correction": "corrected text or null",
+  "type": "word" or "sentence",
+  "message": "Traditional Chinese friendly message for kids (e.g. '您是不是要找 Apple?')"
+}`;
+
+        try {
+            // We use a low temperature for determinism
+            const result = await llmService.generatePrompt(systemPrompt, word, {
+                model: 'gpt-3.5-turbo' // or default
+            });
+
+            // Parse JSON
+            let parsed = result;
+            if (typeof result === 'string') {
+                // Try to strip code blocks
+                const jsonStr = result.replace(/```json|```/g, '').trim();
+                try {
+                    parsed = JSON.parse(jsonStr);
+                } catch (e) {
+                    // Fallback if AI fails to return JSON
+                    console.warn('[KidsV2] Validation JSON parse failed, assuming valid');
+                    return { isValid: true, correction: null, type: 'word', message: '' };
+                }
+            }
+            return parsed;
+        } catch (e) {
+            console.error('[KidsV2] Validation failed, failing open:', e);
+            // Fail open: let it pass if validation breaks
+            return { isValid: true, correction: null, type: 'word', message: '' };
+        }
+    }
+
+    /**
      * Main Entry Point
      * Returns { type: 'basic'|'enhanced', data: ... }
      */
