@@ -120,7 +120,10 @@ class GitHubStorageService {
             return this.getRawUrl(filename);
 
         } catch (error) {
-            console.error(`❌ GitHub Upload Failed for ${word}:`, error.message);
+            console.error(`❌ GitHub Upload Failed for ${word}:`, error);
+            if (error.response) {
+                console.error('❌ GitHub API Error Data:', JSON.stringify(error.response.data));
+            }
             return null;
         }
     }

@@ -1,0 +1,346 @@
+extends layout
+
+block content
+  .container.py-5
+    h1.mb-4.text-center 🧠 Visual Mnemonic Lab
+    p.lead.text-center.mb-5 Combine Text AI & Image AI to create educational memory aids.
+
+    //- Settings Section
+    .card.mb-4
+      .card-header.bg-light
+        button.btn.btn-link.text-decoration-none(type='button' data-bs-toggle='collapse' data-bs-target='#settingsParams') 
+          i.fas.fa-cogs.me-2
+          | Architect Settings (System Prompt & API)
+      #settingsParams.collapse
+        .card-body
+          .mb-3
+            label.form-label(for='systemPrompt') System Prompt (The Architect's Brain)
+            textarea#systemPrompt.form-control(rows='12')= systemPrompt
+          .row
+            .col-md-6
+              .mb-3
+                label.form-label(for='apiKey') OpenAI API Key (Optional - leave empty for free usage)
+                input#apiKey.form-control(type='password' placeholder='sk-...')
+            .col-md-6
+              .mb-3
+                label.form-label(for='baseUrl') Base URL (Optional)
+                input#baseUrl.form-control(type='text' placeholder='https://text.pollinations.ai/')
+
+    //- Step 1: Input
+    .card.mb-3.shadow-sm
+      .card-body
+        h4.card-title Step 1: The Word
+        .input-group.mb-3
+          input#wordInput.form-control.form-control-lg(type='text' placeholder='Enter an English word...' value='')
+          button#btnPlan.btn.btn-primary.btn-lg(type='button') 
+            i.fas.fa-drafting-compass.me-2
+            | 1. Generate Plan
+
+    //- Step 2: The Blueprint (Labels & Prompt)
+    #planSection.card.mb-3.d-none
+      .card-body.bg-light
+        h4.card-title Step 2: The Blueprint
+        .row.g-3
+          .col-md-8
+            label.form-label Image Prompt (Painter's Instruction)
+            textarea#generatedPrompt.form-control(rows='3')
+          .col-md-4
+            label.form-label Text Labels (Etymology Overlay)
+            .input-group.mb-2
+              span.input-group-text.bg-primary.text-white Prefix
+              input#labelPrefix.form-control(type='text' placeholder='Pre-')
+            .input-group.mb-2
+              span.input-group-text.bg-success.text-white Root
+              input#labelRoot.form-control(type='text' placeholder='-dict-')
+            .input-group.mb-2
+              span.input-group-text.bg-info.text-white Suffix
+              input#labelSuffix.form-control(type='text' placeholder='-ion')
+            .input-group.mb-2
+              span.input-group-text Master
+              input#labelMaster.form-control(type='text' placeholder='Full Text')
+            .input-group.mb-2
+              span.input-group-text Definition
+              input#labelTheme.form-control.text-danger(type='text' placeholder='Meaning...')
+            .input-group
+              span.input-group-text Example
+              input#labelExample.form-control.text-muted(type='text' placeholder='Short sentence...')
+        
+        .d-flex.justify-content-end.mt-3
+          button#btnPaint.btn.btn-success.btn-lg(type='button') 
+            i.fas.fa-palette.me-2
+            | 2. Paint Image
+
+    //- Step 3: Studio (Composite)
+    #resultSection.card.mb-3.d-none
+      .card-body.text-center
+        h4.card-title Step 3: The Studio
+        p.text-muted The text is now an overlay. You can allow the text to be perfect.
+        
+        //- Composite Container
+        //- Using relative positioning to hold the image and absolute overlays
+        #compositeContainer.d-inline-block.position-relative.border.rounded.overflow-hidden(style='max-width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #fff;')
+          //- Overlays (Removed Absolute positioning & Header Bar)
+
+          //- The Base Image
+          img#resultImage.d-block(style='max-width: 100%; max-height: 600px; width: auto; height: auto; margin: 0 auto;')
+
+          //- Master Label & Split Word container
+          #overlayCaptionBar.w-100.bg-white.d-flex.flex-column.align-items-center.justify-content-center(style='padding: 20px 10px; border-top: 2px solid #eee;')
+             div(style='font-size: 2rem; font-weight: bold; color: #333; text-align: center; line-height: 1.2;')
+               //- The Split View (Hidden by default)
+               span#overlaySplitContainer(style='display: none;')
+                   span#overlayLabelPrefix.text-primary.mx-1 Prefix
+                   span#overlayLabelRoot.text-success.mx-1 Root
+                   span#overlayLabelSuffix.text-info.mx-1 Suffix
+               
+               //- The Master View (Default)
+               span#overlayLabelMaster(style='display: inline-block;') WORD
+               
+               span#overlayLabelTheme.text-danger.ms-2(style='font-size: 1.4rem; display: none; vertical-align: middle;') (Theme)
+             div#overlayLabelExample.text-muted.mt-2.fst-italic(style='font-size: 1.2rem; display: none;') Example Sentence...
+
+        .mt-4
+          button#btnUpload.btn.btn-dark.btn-lg(type='button')
+            i.fab.fa-github.me-2
+            | 3. Merge & Upload to Cloud
+          div#uploadStatus.mt-2
+
+    //- Step 4: Teaching Note (New Feature)
+    #teachingSection.card.mb-3.d-none.border-info
+      .card-header.bg-info.text-white
+        i.fas.fa-chalkboard-teacher.me-2
+        | Architect's Teaching Note
+      .card-body
+        .mb-3
+          h5.text-primary 
+            i.fas.fa-shapes.me-2
+            | Structure (零件構造)
+          p#teachStructure.lead.fw-bold ...
+        .mb-3
+          h5.text-success 
+            i.fas.fa-image.me-2
+            | Visual Mnemonic (畫面聯想)
+          p#teachVisual.fst-italic ...
+        .mb-0
+          h5.text-warning 
+            i.fas.fa-link.me-2
+            | Connection (記憶連結)
+          p#teachConnection ...
+
+block scripts
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnPlan = document.getElementById('btnPlan');
+      const btnPaint = document.getElementById('btnPaint');
+      const btnUpload = document.getElementById('btnUpload');
+      const wordInput = document.getElementById('wordInput');
+      
+      // Live Update Overlays
+      const inputs = ['labelPrefix', 'labelRoot', 'labelSuffix', 'labelMaster', 'labelTheme', 'labelExample'];
+      inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+           // Special handling
+           if (id === 'labelTheme') {
+              const el = document.getElementById('overlayLabelTheme');
+              el.textContent = e.target.value ? `(${e.target.value})` : '';
+              el.style.display = e.target.value ? 'inline-block' : 'none';
+           } else if (id === 'labelExample') {
+              const el = document.getElementById('overlayLabelExample');
+              el.textContent = e.target.value;
+              el.style.display = e.target.value ? 'block' : 'none';
+           } else {
+               // Generic handler for labels (Prefix/Root/Suffix/Master)
+               const targetId = 'overlay' + id.charAt(0).toUpperCase() + id.slice(1);
+               const el = document.getElementById(targetId);
+               if(el) el.textContent = e.target.value;
+           }
+        });
+      });
+
+      // Step 1: Generate Plan (JSON)
+      btnPlan.addEventListener('click', async () => {
+        const word = wordInput.value.trim();
+        const systemPrompt = document.getElementById('systemPrompt').value;
+        const apiKey = document.getElementById('apiKey').value;
+        const baseUrl = document.getElementById('baseUrl').value;
+
+        if (!word) return alert('Please enter a word');
+        
+        btnPlan.disabled = true;
+        btnPlan.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Thinking...';
+
+        try {
+          const res = await fetch('/mnemonic/generate-architect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ word, systemPrompt, apiKey, baseUrl })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+            // Destructure response with fallbacks
+            const analysis = data.analysis || {};
+            const teaching = data.teaching || {};
+
+            // Fill Prompt
+            document.getElementById('generatedPrompt').value = data.image_prompt || '';
+            
+            // Fill Labels (Mapped from Analysis)
+            document.getElementById('labelPrefix').value = analysis.prefix || '';
+            document.getElementById('labelRoot').value = analysis.root || '';
+            document.getElementById('labelSuffix').value = analysis.suffix || '';
+            document.getElementById('labelMaster').value = word; // Use input word directly
+            
+            // Theme & Example
+            let theme = analysis.theme || '';
+            document.getElementById('labelTheme').value = theme;
+            document.getElementById('labelExample').value = teaching.visual || '';
+
+            // Update Teaching Card
+            document.getElementById('teachStructure').textContent = teaching.structure || 'N/A';
+            document.getElementById('teachVisual').textContent = teaching.visual || 'N/A';
+            document.getElementById('teachConnection').textContent = teaching.connection || 'N/A';
+            document.getElementById('teachingSection').classList.remove('d-none');
+            
+            // Update Overlay Text immediately
+            
+            // Logic: Toggle between Split View vs Master View
+            // If prefix or root exists, we assume it's a split word
+            const hasSplit = (analysis.prefix && analysis.prefix !== 'null') || (analysis.root && analysis.root !== 'null');
+            
+            if (hasSplit) {
+                 // Show Split Container
+                 document.getElementById('overlaySplitContainer').style.display = 'inline-block';
+                 document.getElementById('overlayLabelMaster').style.display = 'none';
+
+                 document.getElementById('overlayLabelPrefix').textContent = analysis.prefix || '';
+                 document.getElementById('overlayLabelRoot').textContent = analysis.root || '';
+                 document.getElementById('overlayLabelSuffix').textContent = analysis.suffix || '';
+            } else {
+                 // Show Master Only
+                 document.getElementById('overlaySplitContainer').style.display = 'none';
+                 document.getElementById('overlayLabelMaster').style.display = 'inline-block';
+                 document.getElementById('overlayLabelMaster').textContent = word;
+            }
+            
+            // Theme
+            const themeEl = document.getElementById('overlayLabelTheme');
+            themeEl.textContent = theme ? `(${theme})` : '';
+            themeEl.style.display = theme ? 'inline-block' : 'none';
+            
+            // Example
+            const exEl = document.getElementById('overlayLabelExample');
+            const exText = teaching.visual || '';
+            exEl.textContent = exText;
+            exEl.style.display = exText ? 'block' : 'none';
+
+            document.getElementById('planSection').classList.remove('d-none');
+            // Scroll to plan
+            document.getElementById('planSection').scrollIntoView({ behavior: 'smooth' });
+          } else {
+            alert('Error: ' + data.error);
+          }
+        } catch (e) {
+          alert('Network Error');
+          console.error(e);
+        } finally {
+          btnPlan.disabled = false;
+          btnPlan.innerHTML = '<i class="fas fa-drafting-compass me-2"></i> 1. Generate Plan';
+        }
+      });
+
+      // Step 2: Generate Image
+      btnPaint.addEventListener('click', async () => {
+        const prompt = document.getElementById('generatedPrompt').value;
+        const word = wordInput.value.trim();
+        
+        if (!prompt) return alert('No prompt found');
+
+        btnPaint.disabled = true;
+        btnPaint.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Painting...';
+        
+        try {
+          const res = await fetch('/mnemonic/generate-painter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, word })
+          });
+          const data = await res.json();
+          
+          if (data.success) {
+             const img = document.getElementById('resultImage');
+             
+             // Client-side Load Handling
+             img.onload = () => {
+                 // Show Result Section only when image is ready
+                 document.getElementById('resultSection').classList.remove('d-none');
+                 document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+                 
+                 // Re-enable button
+                 btnPaint.disabled = false;
+                 btnPaint.innerHTML = '<i class="fas fa-palette me-2"></i> 2. Paint Image';
+             };
+             
+             img.onerror = () => {
+                 alert('Failed to load image from external provider.');
+                 btnPaint.disabled = false;
+                 btnPaint.innerHTML = '<i class="fas fa-palette me-2"></i> 2. Paint Image';
+             };
+
+             // Add crossOrigin anonymous to allow canvas export
+             img.crossOrigin = "Anonymous";
+             img.src = data.image; 
+             
+          } else {
+            alert('Error: ' + data.error);
+            btnPaint.disabled = false;
+            btnPaint.innerHTML = '<i class="fas fa-palette me-2"></i> 2. Paint Image';
+          }
+        } catch (e) {
+          alert('Paint Error: ' + e.message);
+          btnPaint.disabled = false;
+          btnPaint.innerHTML = '<i class="fas fa-palette me-2"></i> 2. Paint Image';
+        }
+      });
+
+      // Step 3: Html2Canvas Merge & Upload
+      btnUpload.addEventListener('click', async () => {
+        const word = wordInput.value.trim();
+        const container = document.getElementById('compositeContainer');
+        const statusDiv = document.getElementById('uploadStatus');
+        
+        btnUpload.disabled = true;
+        statusDiv.innerHTML = '<span class="text-primary"><i class="fas fa-spinner fa-spin"></i> Merging & Uploading...</span>';
+
+        try {
+          // 1. Capture the DOM element as a canvas
+          const canvas = await html2canvas(container, {
+             useCORS: true, // Internal base64 should be fine
+             scale: 2 // High quality
+          });
+          
+          // 2. Convert to Base64 (remove prefix)
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+          const base64Content = dataUrl.split(',')[1];
+          
+          // 3. Upload
+          const res = await fetch('/mnemonic/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ word: word, imageBase64: base64Content })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            statusDiv.innerHTML = `<div class="alert alert-success mt-2">✅ Image hosted at: <a href="${data.url}" target="_blank" class="alert-link">GitHub Link</a></div>`;
+          } else {
+            statusDiv.innerHTML = `<div class="alert alert-danger mt-2">❌ Upload failed: ${data.error}</div>`;
+            btnUpload.disabled = false;
+          }
+        } catch (e) {
+            console.error(e);
+            statusDiv.innerHTML = `<div class="alert alert-danger mt-2">❌ Merge/Upload Error: ${e.message}</div>`;
+            btnUpload.disabled = false;
+        }
+      });
+    });

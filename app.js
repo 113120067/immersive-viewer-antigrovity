@@ -19,6 +19,7 @@ var visionRouter = require('./routes/vision');
 var imageGeneratorRouter = require('./routes/image-generator');
 var vocabularyGeneratorRouter = require('./routes/vocabulary-generator');
 var kidsVocabularyRouter = require('./routes/kids-vocabulary');
+var mnemonicRouter = require('./routes/mnemonic');
 var usageStatsRouter = require('./routes/usage-stats');
 
 var app = express();
@@ -28,8 +29,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -46,6 +47,7 @@ app.use('/vision', visionRouter);
 app.use('/image-generator', imageGeneratorRouter);
 app.use('/vocabulary-generator', vocabularyGeneratorRouter);
 app.use('/kids-vocabulary', kidsVocabularyRouter);
+app.use('/mnemonic', mnemonicRouter);
 app.use('/usage-stats', usageStatsRouter);
 
 // Serve test HTML files
@@ -110,12 +112,12 @@ app.get('/test-speech-layout.html', (req, res) => {
 });
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

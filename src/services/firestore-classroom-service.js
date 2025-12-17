@@ -3,8 +3,8 @@
  * Manages classroom data in Firestore with authentication support
  */
 
-const { db } = require('../config/firebase-admin');
-const admin = require('firebase-admin');
+const { db, admin } = require('../config/firebase-admin');
+// const admin = require('firebase-admin'); // Removed unsafe import
 
 /**
  * Check if Firestore is available
@@ -214,7 +214,7 @@ async function startSession({ classroomId, studentName, userId = null }) {
   if (!db) throw new Error('Firestore is not initialized');
 
   const studentsRef = db.collection('classrooms').doc(classroomId).collection('students');
-  
+
   // Find student by name or userId
   let query = studentsRef.where('name', '==', studentName);
   const snapshot = await query.limit(1).get();
@@ -246,7 +246,7 @@ async function endSession({ classroomId, studentName, userId = null }) {
   if (!db) throw new Error('Firestore is not initialized');
 
   const studentsRef = db.collection('classrooms').doc(classroomId).collection('students');
-  
+
   let query = studentsRef.where('name', '==', studentName);
   const snapshot = await query.limit(1).get();
 
@@ -323,7 +323,7 @@ async function getStudentStatus({ classroomId, studentName, userId = null }) {
   if (!db) throw new Error('Firestore is not initialized');
 
   const studentsRef = db.collection('classrooms').doc(classroomId).collection('students');
-  
+
   let query = studentsRef.where('name', '==', studentName);
   const snapshot = await query.limit(1).get();
 
@@ -414,7 +414,7 @@ async function recordPractice({ classroomId, studentName, word, correct, userId 
   if (!db) throw new Error('Firestore is not initialized');
 
   const studentsRef = db.collection('classrooms').doc(classroomId).collection('students');
-  
+
   let query = studentsRef.where('name', '==', studentName);
   const snapshot = await query.limit(1).get();
 
@@ -468,7 +468,7 @@ async function getMyClassrooms(ownerId) {
 
   for (const doc of snapshot.docs) {
     const data = doc.data();
-    
+
     // Count students
     const studentsSnapshot = await doc.ref.collection('students').get();
     const studentCount = studentsSnapshot.size;
@@ -513,7 +513,7 @@ async function getMyParticipations(userId) {
 
   for (const studentDoc of studentsSnapshot.docs) {
     const studentData = studentDoc.data();
-    
+
     // Get parent classroom
     const classroomRef = studentDoc.ref.parent.parent;
     const classroomDoc = await classroomRef.get();
@@ -594,7 +594,7 @@ async function getStudentProgress({ classroomId, userId }) {
   const wordStats = studentData.wordStats || {};
   const totalWords = studentData.words ? studentData.words.length : 0;
   let masteredWords = 0;
-  
+
   Object.keys(wordStats).forEach(word => {
     const stats = wordStats[word];
     const total = stats.correct + stats.wrong;
