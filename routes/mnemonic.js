@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const llmService = require('../src/services/llm-service');
 const githubStorage = require('../src/services/github-storage');
+const mnemonicLogService = require('../src/services/mnemonic-log-service');
 const axios = require('axios');
 
 // Default Prompt Path
@@ -48,7 +49,7 @@ router.post('/generate-architect', async (req, res) => {
         });
 
         console.log('[Architect] Raw LLM Response Type:', typeof rawResponse);
-        console.log('[Architect] Raw LLM Response:', JSON.stringify(rawResponse, null, 2).substring(0, 500) + '...');
+        // console.log('[Architect] Raw LLM Response:', JSON.stringify(rawResponse, null, 2).substring(0, 500) + '...');
 
         let result;
 
@@ -89,9 +90,21 @@ router.post('/generate-architect', async (req, res) => {
             result = { image_prompt: result.content, labels: {} };
         }
 
-        console.log('[Architect] Parsed Result:', JSON.stringify(result));
+        // --- FIREBASE LOGGING START ---
+        // Create initial log entry
+        const logId = await mnemonicLogService.createLog({
+            word: word,
+            analysis: result.analysis,
+            teaching: result.teaching,
+            image_prompt: result.image_prompt,
+            client_ip: req.ip,
+            user_agent: req.get('User-Agent')
+        });
+        console.log(`[Architect] Logged to Firebase. LogId: ${logId}`);
+        // --- FIREBASE LOGGING END ---
 
-        res.json({ success: true, ...result });
+        // Return result AND logId to frontend
+        res.json({ success: true, ...result, logId });
     } catch (error) {
         console.error('[Architect] Error:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -103,7 +116,7 @@ router.post('/generate-architect', async (req, res) => {
  * Role 2: Image AI generates the image from proposed prompt
  */
 router.post('/generate-painter', async (req, res) => {
-    const { prompt, word } = req.body;
+    const { prompt, word, logId } = req.body;
 
     if (!prompt) return res.status(400).json({ success: false, error: 'Prompt is required' });
 
@@ -111,6 +124,13 @@ router.post('/generate-painter', async (req, res) => {
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000);
     const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&model=flux&seed=${seed}&nologo=true`;
+
+    // --- FIREBASE LOGGING START ---
+    if (logId) {
+        // Run in background, don't await blocking response
+        mnemonicLogService.logImageGeneration(logId, imageUrl).catch(err => console.error(err));
+    }
+    // --- FIREBASE LOGGING END ---
 
     // Direct return of URL to avoid server timeout (Client-side load)
     res.json({
@@ -124,7 +144,7 @@ router.post('/generate-painter', async (req, res) => {
  * Publish the image to GitHub (API Only)
  */
 router.post('/upload', async (req, res) => {
-    const { word, imageBase64 } = req.body;
+    const { word, imageBase64, logId } = req.body;
 
     if (!word || !imageBase64) {
         return res.status(400).json({ success: false, error: 'Missing word or image data' });
@@ -138,6 +158,12 @@ router.post('/upload', async (req, res) => {
         const url = await githubStorage.uploadImage(word, buffer, 'jpg');
 
         if (url) {
+            // --- FIREBASE LOGGING START ---
+            if (logId) {
+                mnemonicLogService.logUpload(logId, url).catch(err => console.error(err));
+            }
+            // --- FIREBASE LOGGING END ---
+
             res.json({ success: true, url });
         } else {
             res.status(500).json({ success: false, error: 'Upload failed (Check server logs)' });

@@ -1,0 +1,56 @@
+[
+  {
+    "word": "Candidate",
+    "analysis": {
+      "analysis": {
+        "type": "Layer 3 (Puzzle)",
+        "parts": [
+          {
+            "label": "字首 OR 聲音 (顯示標籤)",
+            "content": "Cand",
+            "definition": "來自拉丁語 cand-，意為白、潔白、光亮"
+          },
+          {
+            "label": "字根 OR 拼字 (顯示標籤)",
+            "content": "Date",
+            "definition": "日子、日期；在字尾形成候選人的拼字結構，暗示被選擇之「時刻」"
+          }
+        ],
+        "theme": "被考慮中的人（候選人），即將被選中的角色"
+      },
+      "teaching": {
+        "structure": "Cand（前綴/字根，意味白/潔淨） + Date（結尾，象徵日子/日期） → 合成單字 candidate，表示被考慮或被選中的人",
+        "visual": "畫面聯想劇本：穿白袍的角色在舞台上展示一顆巨大的日期果，象徵他是被考慮的候選人",
+        "connection": "記憶連結：想到 candidate，就想起白色的 Cand 與日子/日期的 Date，合起來就是被選中的人"
+      },
+      "image_prompt": "A single composite scene in Pixar-style 3D animation: a character wearing a white robe stands on a stage presenting a large, shiny date fruit to a panel of judges; bright, high-contrast colors, friendly and cute design; no text visible; the image should convey the idea of a candidate — someone being considered for a position."
+    }
+  },
+  {
+    "word": "Museum",
+    "analysis": {
+      "analysis": {
+        "type": "Layer 2 (Standard)",
+        "parts": [
+          {
+            "label": "字根 (Root)",
+            "content": "Muse",
+            "definition": "Muse：沉思、靈感的來源；缪斯女神"
+          },
+          {
+            "label": "字尾 (Suffix)",
+            "content": "um",
+            "definition": "-um：拉丁語後綴，常見於表示地點或物品的名詞結尾"
+          }
+        ],
+        "theme": "博物館：收藏與展示知識與藝術的場所"
+      },
+      "teaching": {
+        "structure": "Muse (沉思、靈感) + -um (地點/場所的後綴) 的結構拆解，呈現單字由詞源組成的理念。",
+        "visual": "畫面聯想劇本：在一座光彩繽紛的博物館裡，一位會飛的缪斯坐在展品旁，激發孩子的想像力，兩者合成一個充滿靈感的互動場景。",
+        "connection": "記憶連結：想起英文字根「Muse」與靈感的連結；想像你走進博物館尋找靈感的情景，就是這個單字的畫面化解讀。"
+      },
+      "image_prompt": "A 3D Pixar-style scene inside a bright, colorful museum filled with glass display cases and vibrant paintings. A friendly winged muse hovers beside a curious child, whispering ideas as glowing orbs float from the muse to the exhibits, linking inspiration to artifacts. The scene is warm, high-contrast, and kid-friendly, with no text anywhere in the image."
+    }
+  }
+]

@@ -46,15 +46,10 @@ block content
             textarea#generatedPrompt.form-control(rows='3')
           .col-md-4
             label.form-label Text Labels (Etymology Overlay)
-            .input-group.mb-2
-              span.input-group-text.bg-primary.text-white Prefix
-              input#labelPrefix.form-control(type='text' placeholder='Pre-')
-            .input-group.mb-2
-              span.input-group-text.bg-success.text-white Root
-              input#labelRoot.form-control(type='text' placeholder='-dict-')
-            .input-group.mb-2
-              span.input-group-text.bg-info.text-white Suffix
-              input#labelSuffix.form-control(type='text' placeholder='-ion')
+            //- Dynamic Parts Container
+            #partsContainer
+              //- Will be populated by JS
+              .text-muted.small.fst-italic Waiting for plan...
             .input-group.mb-2
               span.input-group-text Master
               input#labelMaster.form-control(type='text' placeholder='Full Text')
@@ -89,9 +84,7 @@ block content
              div(style='font-size: 2rem; font-weight: bold; color: #333; text-align: center; line-height: 1.2;')
                //- The Split View (Hidden by default)
                span#overlaySplitContainer(style='display: none;')
-                   span#overlayLabelPrefix.text-primary.mx-1 Prefix
-                   span#overlayLabelRoot.text-success.mx-1 Root
-                   span#overlayLabelSuffix.text-info.mx-1 Suffix
+                   //- Dynamic spans will go here
                
                //- The Master View (Default)
                span#overlayLabelMaster(style='display: inline-block;') WORD
@@ -135,27 +128,38 @@ block scripts
       const btnUpload = document.getElementById('btnUpload');
       const wordInput = document.getElementById('wordInput');
       
-      // Live Update Overlays
-      const inputs = ['labelPrefix', 'labelRoot', 'labelSuffix', 'labelMaster', 'labelTheme', 'labelExample'];
-      inputs.forEach(id => {
+      // Live Update Overlays (Static Inputs)
+      const staticInputs = ['labelMaster', 'labelTheme', 'labelExample'];
+      staticInputs.forEach(id => {
         document.getElementById(id).addEventListener('input', (e) => {
-           // Special handling
            if (id === 'labelTheme') {
               const el = document.getElementById('overlayLabelTheme');
-              el.textContent = e.target.value ? `(${e.target.value})` : '';
+              el.textContent = e.target.value ? `(` + e.target.value + `)` : '';
               el.style.display = e.target.value ? 'inline-block' : 'none';
            } else if (id === 'labelExample') {
               const el = document.getElementById('overlayLabelExample');
               el.textContent = e.target.value;
               el.style.display = e.target.value ? 'block' : 'none';
-           } else {
-               // Generic handler for labels (Prefix/Root/Suffix/Master)
-               const targetId = 'overlay' + id.charAt(0).toUpperCase() + id.slice(1);
-               const el = document.getElementById(targetId);
-               if(el) el.textContent = e.target.value;
+           } else if (id === 'labelMaster') {
+              const el = document.getElementById('overlayLabelMaster');
+              if(el) el.textContent = e.target.value;
            }
         });
       });
+
+      // Helper: Bind Dynamic Part Inputs
+      function bindDynamicParts() {
+         const rows = document.querySelectorAll('.part-row');
+         rows.forEach((row, index) => {
+            const input = row.querySelector('.part-input');
+            input.addEventListener('input', (e) => {
+               const overlayEl = document.getElementById(`overlayPart_${index}`);
+               if(overlayEl) overlayEl.textContent = e.target.value;
+            });
+         });
+      }
+
+      let currentLogId = null; // Global state for tracking session
 
       // Step 1: Generate Plan (JSON)
       btnPlan.addEventListener('click', async () => {
@@ -168,6 +172,7 @@ block scripts
         
         btnPlan.disabled = true;
         btnPlan.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Thinking...';
+        currentLogId = null; // Reset for new word
 
         try {
           const res = await fetch('/mnemonic/generate-architect', {
@@ -178,6 +183,8 @@ block scripts
           const data = await res.json();
           
           if (data.success) {
+            currentLogId = data.logId; // Store Log ID
+            
             // Destructure response with fallbacks
             const analysis = data.analysis || {};
             const teaching = data.teaching || {};
@@ -185,11 +192,52 @@ block scripts
             // Fill Prompt
             document.getElementById('generatedPrompt').value = data.image_prompt || '';
             
-            // Fill Labels (Mapped from Analysis)
-            document.getElementById('labelPrefix').value = analysis.prefix || '';
-            document.getElementById('labelRoot').value = analysis.root || '';
-            document.getElementById('labelSuffix').value = analysis.suffix || '';
-            document.getElementById('labelMaster').value = word; // Use input word directly
+            // 1. Handle Parts (Dynamic)
+            const partsContainer = document.getElementById('partsContainer');
+            const overlayContainer = document.getElementById('overlaySplitContainer');
+            partsContainer.innerHTML = '';
+            overlayContainer.innerHTML = '';
+            
+            // normalize parts: new 'parts' array OR old 'prefix/root/suffix' fallback
+            let parts = analysis.parts || [];
+            if (parts.length === 0) {
+                 // Fallback for old prompt version or manual simple split
+                 if (analysis.prefix && analysis.prefix !== 'null') parts.push({ label: 'Prefix', content: analysis.prefix, definition: '' });
+                 if (analysis.root && analysis.root !== 'null') parts.push({ label: 'Root', content: analysis.root, definition: '' });
+                 if (analysis.suffix && analysis.suffix !== 'null') parts.push({ label: 'Suffix', content: analysis.suffix, definition: '' });
+            }
+
+            // Colors for rotation
+            const colors = ['bg-primary', 'bg-success', 'bg-info', 'bg-warning', 'bg-danger'];
+            const textColors = ['text-primary', 'text-success', 'text-info', 'text-warning', 'text-danger'];
+            
+            parts.forEach((part, index) => {
+                const colorClass = colors[index % colors.length];
+                const textColorClass = textColors[index % textColors.length];
+                
+                // Add Input Row
+                const rowHtml = `
+                    <div class="input-group mb-2 part-row">
+                      <span class="input-group-text ${colorClass} text-white part-label">${part.label || 'Part'}</span>
+                      <input type="text" class="form-control part-input" value="${part.content || ''}" placeholder="Content">
+                      <span class="input-group-text text-muted small" style="min-width: 60px;">${part.definition || ''}</span>
+                    </div>
+                `;
+                partsContainer.insertAdjacentHTML('beforeend', rowHtml);
+                
+                // Add Overlay Span
+                const span = document.createElement('span');
+                span.id = `overlayPart_${index}`;
+                span.className = `mx-1 overlay-part ${textColorClass}`;
+                span.textContent = part.content || '';
+                overlayContainer.appendChild(span);
+            });
+            
+            // Re-bind listeners for the new inputs
+            bindDynamicParts();
+
+            // Fill Other Labels
+            document.getElementById('labelMaster').value = word; 
             
             // Theme & Example
             let theme = analysis.theme || '';
@@ -202,20 +250,13 @@ block scripts
             document.getElementById('teachConnection').textContent = teaching.connection || 'N/A';
             document.getElementById('teachingSection').classList.remove('d-none');
             
-            // Update Overlay Text immediately
-            
             // Logic: Toggle between Split View vs Master View
-            // If prefix or root exists, we assume it's a split word
-            const hasSplit = (analysis.prefix && analysis.prefix !== 'null') || (analysis.root && analysis.root !== 'null');
+            const hasSplit = parts.length > 0;
             
             if (hasSplit) {
                  // Show Split Container
                  document.getElementById('overlaySplitContainer').style.display = 'inline-block';
                  document.getElementById('overlayLabelMaster').style.display = 'none';
-
-                 document.getElementById('overlayLabelPrefix').textContent = analysis.prefix || '';
-                 document.getElementById('overlayLabelRoot').textContent = analysis.root || '';
-                 document.getElementById('overlayLabelSuffix').textContent = analysis.suffix || '';
             } else {
                  // Show Master Only
                  document.getElementById('overlaySplitContainer').style.display = 'none';
@@ -263,7 +304,7 @@ block scripts
           const res = await fetch('/mnemonic/generate-painter', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, word })
+            body: JSON.stringify({ prompt, word, logId: currentLogId })
           });
           const data = await res.json();
           
@@ -327,7 +368,7 @@ block scripts
           const res = await fetch('/mnemonic/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ word: word, imageBase64: base64Content })
+            body: JSON.stringify({ word: word, imageBase64: base64Content, logId: currentLogId })
           });
           const data = await res.json();
 
