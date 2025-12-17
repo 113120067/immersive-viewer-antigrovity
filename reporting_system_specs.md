@@ -74,4 +74,27 @@
 由於保留了完整的封存資料 (Prompt, Analysis, Image)，開發者可定期檢視 `_archive` 集合：
 *   **分析誤判**：是否某些單字容易產生歧義？
 *   **優化 Prompt**：根據被檢舉的圖片特徵，調整 System Prompt 或 Safety Suffix。
-*   **模型調整**：若特定風格持續被檢舉，可更換 Pollinations 的繪圖模型 (如從 flux 改為其他)。
+
+---
+
+## 5. 系統自我修復與維護 (System Self-Healing)
+
+為了避免因生成過程中斷（如 Pollinations 超時、網路問題）導致資料庫留下無圖片的「幽靈資料 (Ghost Data)」，系統實作了以下機制：
+
+### 壞資料定義 (Definition)
+符合以下所有條件者視為壞資料：
+*   **狀態**：`planned` (已策劃但未完工)。
+*   **圖片欄位**：`generated_image_url` 為空。
+*   **建立時間**：超過 **10 分鐘** (視為超時)。
+
+### 修復機制 (Recovery Strategy)
+
+1.  **即時攔截 (Just-in-Time Healing)**
+    *   **觸發點**：使用者查詢單字 (`getOrGenerate`)。
+    *   **邏輯**：若系統發現對應的資料符合上述「壞資料」定義，會**自動忽略**該筆紀錄，視為「無資料」，並立即觸發一次全新的生成流程。
+
+2.  **背景清理 (Background Cleanup)**
+    *   **服務**：`GhostCleanupService`。
+    *   **操作**：管理員可透過 API (`POST /kids-v2/cleanup`) 觸發。
+    *   **流程**：掃描所有壞資料 -> 複製到 `mnemonic_ghosts_archive` -> 從主資料庫刪除。
+
