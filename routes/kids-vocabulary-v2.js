@@ -10,8 +10,12 @@ router.post('/generate', async (req, res) => {
     const { word } = req.body;
     const userIp = req.ip;
 
-    if (!word) {
+    if (!word || typeof word !== 'string') {
         return res.status(400).json({ success: false, error: 'Word is required' });
+    }
+
+    if (word.length > 60) {
+        return res.status(400).json({ success: false, error: 'Input too long (max 60 chars)' });
     }
 
     try {

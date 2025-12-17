@@ -306,8 +306,8 @@ class KidsVocabularyGenerator {
       return;
     }
 
-    if (input.length > 100) {
-      this.showError('輸入太長了！請輸入簡短的英文單字或句子。');
+    if (input.length > 60) {
+      this.showError('輸入太長了！請輸入 60 字以內的英文單字或句子。');
       return;
     }
 

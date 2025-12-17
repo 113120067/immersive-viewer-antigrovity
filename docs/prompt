@@ -31,6 +31,9 @@
     *   **Layer 3: 拼圖拆解字 (Puzzle Split)**：
         *   條件：**所有不符合 L1 & L2 的字** (通常長度 > 4 且無縮寫字根)。這包含大多數國中單字 (e.g. `Rabbit`, `Summer`, `Planet`, `Barbecue`).
         *   動作：**強制諧音/拼字拆解 (Force Creative Split)**。
+    *   **Layer 4: 句型/片語模式 (Sentence/Phrase)**：
+        *   條件：**輸入包含空格 (Space)**，且為完整句子或片語 (e.g. `I love you`, `Big red apple`, `On the table`).
+        *   動作：**文法/情境拆解 (Contextual Split)**。不用硬拆字根，而是拆解句子的「主角、動作、地點」。
 
 2.  **拆解與聯想 (Action)**：
     *   **Layer 1 (Glance)**：不拆解。
@@ -39,6 +42,10 @@
         *   *Constraint*: 聯想劇本必須包含**字義暗示**。
         *   *Example:* `Rabbit` -> `Ra`(Ra神) + `bbit`(Bit咬) -> 埃及神咬蘿蔔。
         *   *Example:* `Summer` -> `Sum`(算數) + `mer`(Mermaid) -> 美人魚在**大太陽下**算數。
+    *   **Layer 4 (Sentence)**：**情境畫面建構**。
+        *   *Analysis*: 標示出 `Subject` (主角), `Action` (動作), `Location/Adjective` (地點/修飾)。
+        *   *Example:* `A cat sleeping on the moon` -> `A cat` (主角) + `sleeping` (動作) + `on the moon` (地點) -> 一隻貓咪捲成一團在月亮上睡覺。
+        *   *Note*: 務必強調整體畫面的連貫性。
 
 ### Phase 2: 視覺化指令生成 (Image Generation Prompt)
 **Language Rule**: 此部分的輸出 (JSON 中的 `image_prompt`) 必須使用 **英文 (English)**。
