@@ -28,7 +28,7 @@ class KidsVocabularyV2Service {
     async getOrGenerate(word, userIp) {
         if (!db) throw new Error('Database not available');
 
-        const cleanWord = word.trim();
+        const cleanWord = word.trim().toLowerCase();
 
         // 1. Check DB for existing 'enhanced' or 'basic'
         const snapshot = await db.collection(this.collection)
