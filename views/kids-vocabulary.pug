@@ -1043,6 +1043,13 @@ block scripts
                          generateBtn.disabled = false;
                          generateBtnDesktop.disabled = false;
                      }, 2000);
+
+                     // Mobile/Tablet: Scroll to Image Result (since it might be above the form)
+                     if (window.innerWidth < 992) {
+                         setTimeout(() => {
+                             imageResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                         }, 100);
+                     }
                  };
                  generatedImage.src = data.data.generated_image_url || data.image; // Fallback
                  
