@@ -1008,14 +1008,22 @@ block scripts
       // Shared Generate Function
       async function handleGenerate(e) {
          if(e) e.preventDefault();
-         const word = (window.innerWidth < 576 ? wordInput.value : wordInputDesktop.value).trim();
+         
+         // Robust Input Reading: Check both inputs, prioritize the one with value
+         const valMobile = wordInput ? wordInput.value.trim() : '';
+         const valDesktop = wordInputDesktop ? wordInputDesktop.value.trim() : '';
+         const word = valMobile || valDesktop;
          
          if(!word) return;
 
-         // Mobile Audio Unlock (Critical for iOS/Android)
-         if ('speechSynthesis' in window) {
-             const emptyUtterance = new SpeechSynthesisUtterance('');
-             window.speechSynthesis.speak(emptyUtterance);
+         // Mobile Audio Unlock (Safe Wrapping)
+         try {
+             if ('speechSynthesis' in window) {
+                 const emptyUtterance = new SpeechSynthesisUtterance('');
+                 window.speechSynthesis.speak(emptyUtterance);
+             }
+         } catch (e) {
+             console.warn('Audio unlock failed:', e);
          }
 
          // UI Reset
