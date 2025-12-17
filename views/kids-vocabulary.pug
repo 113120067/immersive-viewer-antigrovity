@@ -20,7 +20,7 @@ block content
               p.mb-0.small.text-muted ✨ 完全免費使用，無需註冊登入 🌸 由免費 AI 生成
             
             // 簡單輸入表單 - 移到最近學過內容之前
-            form#simpleVocabForm
+            form#simpleVocabForm(novalidate)
               .mb-3.mb-md-4
                 label.form-label.h6.h5-md(for="wordInput") 
                   | 🔤 請輸入英文單字或句子：
@@ -84,7 +84,6 @@ block content
                     button.btn.btn-outline-secondary.btn-sm.rounded-pill.quick-chip(type="button" data-word="I am happy") 😊 I am happy
                     button.btn.btn-outline-dark.btn-sm.rounded-pill.quick-chip(type="button" data-word="3 little pigs") 🐷 3 Little Pigs
               
-
               
               // 隱藏的進階選項（預設為小學生友善設置）
               input#providerSelect(type="hidden" value="pollinations")
@@ -163,7 +162,41 @@ block content
                       span#practiceText.small 點擊麥克風開始練習...
               
               .mb-0
-                small.text-muted#aiProvider 
+                small.text-muted#aiProvider POLLINATIONS.AI - V2 HYBRID
+
+              //- ✨ Magic Memory Card Components (Hidden by default)
+              #magicCardSection.mt-3(style='display: none;')
+                 .card.border-warning.shadow-sm
+                    .card-header.bg-warning.text-dark.py-1
+                        h6.mb-0.fw-bold 
+                            i.fas.fa-magic.me-2
+                            | 魔法記憶卡 (Magic Memory)
+                    .card-body.p-2.bg-white
+                        //- State A: Analyzing
+                        #magicStatusAnalyzing.text-center.py-2.text-muted(style='display: none;')
+                            i.fas.fa-hat-wizard.fa-2x.mb-2.text-primary
+                            p.mb-0.small ✨ 魔法師正在分析這個字... 
+                            p.mb-0.small.text-warning 下次來就會有口訣囉！
+
+                        //- State B: Enhanced Content
+                        #magicContentEnhanced(style='display: none;')
+                             //- Parts
+                             .d-flex.flex-wrap.gap-2.justify-content-center.mb-3#magicPartsContainer
+                                //- Dynamic blocks will go here
+                             
+                             //- Visual Mnemonic
+                             .alert.alert-success.d-flex.align-items-start.p-2.mb-2
+                                i.fas.fa-lightbulb.text-success.mt-1.me-2
+                                div
+                                    strong.small 畫面口訣：
+                                    p.mb-0.small#magicVisualText ...
+
+                             //- Connection
+                             .alert.alert-info.d-flex.align-items-start.p-2.mb-0
+                                i.fas.fa-link.text-info.mt-1.me-2
+                                div
+                                    strong.small 記憶連結：
+                                    p.mb-0.small#magicConnectionText ...
             
             // 佔位符
             .placeholder-content#placeholderContent
@@ -943,15 +976,206 @@ block content
 
 block scripts
   script(src="/js/mobile-font-fix.js")
-  script(src="/js/kids-vocabulary.js")
+  //- script(src="/js/kids-vocabulary.js")
+  
+  //- ----------------------------------------------------
+  //- Kids Vocabulary V2 Hybrid Script
+  //- ----------------------------------------------------
   script.
-    // 頁面載入動畫
-    document.addEventListener('DOMContentLoaded', function() {
-      // 簡單的歡迎動畫
-      setTimeout(() => {
-        const welcome = document.getElementById('welcomeMessage');
-        if (welcome) {
-          welcome.style.animation = 'pulse 2s infinite';
-        }
-      }, 1000);
-    });
+      const wordInput = document.getElementById('wordInput');
+      const wordInputDesktop = document.getElementById('wordInputDesktop');
+      const generateBtn = document.getElementById('generateBtn');
+      const generateBtnDesktop = document.getElementById('generateBtnDesktop');
+      const imageResult = document.getElementById('imageResult');
+      const generatedImage = document.getElementById('generatedImage');
+      const placeholderContent = document.getElementById('placeholderContent');
+      const generationStatus = document.getElementById('generationStatus');
+      const errorMessage = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      const downloadLink = document.getElementById('downloadLink');
+      const wordTitle = document.getElementById('wordTitle');
+      const wordMeaning = document.getElementById('wordMeaning');
+      const recentWordsContainer = document.getElementById('recentWords');
+
+      // Magic Card Elements
+      const magicCardSection = document.getElementById('magicCardSection');
+      const magicStatusAnalyzing = document.getElementById('magicStatusAnalyzing');
+      const magicContentEnhanced = document.getElementById('magicContentEnhanced');
+      const magicPartsContainer = document.getElementById('magicPartsContainer');
+      const magicVisualText = document.getElementById('magicVisualText');
+      const magicConnectionText = document.getElementById('magicConnectionText');
+
+      // Shared Generate Function
+      async function handleGenerate(e) {
+         if(e) e.preventDefault();
+         const word = (window.innerWidth < 576 ? wordInput.value : wordInputDesktop.value).trim();
+         
+         if(!word) return;
+
+         // UI Reset
+         imageResult.style.display = 'none';
+         errorMessage.style.display = 'none';
+         placeholderContent.style.display = 'none';
+         generationStatus.style.display = 'block';
+         magicCardSection.style.display = 'none'; 
+
+         // Disable buttons
+         generateBtn.disabled = true;
+         generateBtnDesktop.disabled = true;
+
+         try {
+             // Call V2 Endpoint
+             const res = await fetch('/kids-v2/generate', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ word: word })
+             });
+             const data = await res.json();
+
+             if(data.success) {
+                 // 1. Image
+                 generatedImage.onload = () => {
+                     generationStatus.style.display = 'none';
+                     imageResult.style.display = 'block';
+                     
+                     // Enable buttons with cooldown
+                     setTimeout(() => {
+                         generateBtn.disabled = false;
+                         generateBtnDesktop.disabled = false;
+                     }, 2000);
+                 };
+                 generatedImage.src = data.data.generated_image_url || data.image; // Fallback
+                 
+                 // 2. Word Info
+                 wordTitle.textContent = data.data.word || word;
+                 wordMeaning.textContent = '(單字)'; 
+
+                 // 3. Download Link
+                 downloadLink.href = generatedImage.src;
+
+                 // 4. Magic Card Logic
+                 magicCardSection.style.display = 'block';
+                 
+                 if (data.type === 'enhanced') {
+                     // Show Enhanced Content
+                     magicStatusAnalyzing.style.display = 'none';
+                     magicContentEnhanced.style.display = 'block';
+                     
+                     // Populate Parts
+                     const parts = data.data.analysis?.parts || [];
+                     magicPartsContainer.innerHTML = '';
+                     const colors = ['btn-outline-primary', 'btn-outline-danger', 'btn-outline-success'];
+                     
+                     if (parts.length > 0) {
+                        parts.forEach((p, idx) => {
+                             const span = document.createElement('span');
+                             span.className = `btn btn-sm ${colors[idx % colors.length]} rounded-pill`;
+                             span.style.cursor = 'default';
+                             span.innerHTML = `<strong>${p.content}</strong> <small class='text-muted'>${p.definition}</small>`;
+                             magicPartsContainer.appendChild(span);
+                        });
+                     } else {
+                         magicPartsContainer.innerHTML = '<span class="text-muted small">此單字無需拆解</span>';
+                     }
+                     
+                     // Populate Text
+                     magicVisualText.textContent = data.data.teaching?.visual || '無';
+                     magicConnectionText.textContent = data.data.teaching?.connection || '無';
+                     
+                 } else {
+                     // Show Analyzing State
+                     magicStatusAnalyzing.style.display = 'block';
+                     magicContentEnhanced.style.display = 'none';
+                 }
+
+                 // Add to recent
+                 addToRecent(word);
+
+             } else {
+                 throw new Error(data.error);
+             }
+         } catch(err) {
+             console.error(err);
+             generationStatus.style.display = 'none';
+             errorMessage.style.display = 'block';
+             errorText.textContent = err.message || '生成失敗，請稍後再試';
+             placeholderContent.style.display = 'block';
+             generateBtn.disabled = false;
+             generateBtnDesktop.disabled = false;
+         }
+      }
+
+      // Add To Recent Logic
+      function addToRecent(word) {
+          let recents = JSON.parse(localStorage.getItem('kids_recents') || '[]');
+          if(!recents.includes(word)) {
+              recents.unshift(word);
+              recents = recents.slice(0, 5); 
+              localStorage.setItem('kids_recents', JSON.stringify(recents));
+              renderRecent();
+          }
+      }
+
+      function renderRecent() {
+          const recents = JSON.parse(localStorage.getItem('kids_recents') || '[]');
+          recentWordsContainer.innerHTML = '';
+          if(recents.length === 0) {
+              recentWordsContainer.innerHTML = '<p class="text-muted text-center mb-0 small">還沒有學過的內容</p>';
+              return;
+          }
+          recents.forEach(w => {
+              const btn = document.createElement('button');
+              btn.className = 'btn btn-outline-secondary btn-sm me-2 mb-2 rounded-pill';
+              btn.textContent = w;
+              btn.onclick = () => {
+                  if (window.innerWidth < 576) {
+                      wordInput.value = w;
+                  } else {
+                      wordInputDesktop.value = w;
+                  }
+                  handleGenerate();
+              };
+              recentWordsContainer.appendChild(btn);
+          });
+      }
+
+      // Bind Events
+      document.getElementById('simpleVocabForm').addEventListener('submit', handleGenerate);
+      
+      // Chips
+      document.querySelectorAll('.quick-chip').forEach(btn => {
+          btn.addEventListener('click', () => {
+              const w = btn.dataset.word;
+              if (window.innerWidth < 576) {
+                  wordInput.value = w;
+              } else {
+                  wordInputDesktop.value = w;
+              }
+              handleGenerate();
+          });
+      });
+
+      // Clear buttons
+      document.querySelectorAll('.btn-clear-input').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const targetId = this.getAttribute('data-target');
+          const input = document.getElementById(targetId);
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
+        });
+      });
+
+      // Init
+      renderRecent();
+
+      // 頁面載入動畫
+      document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(() => {
+            const welcome = document.getElementById('welcomeMessage');
+            if (welcome) {
+              welcome.style.animation = 'pulse 2s infinite';
+            }
+          }, 1000);
+      });
