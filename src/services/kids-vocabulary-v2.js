@@ -2,6 +2,7 @@ const { db } = require('../config/firebase-admin');
 const llmService = require('./llm-service');
 const mnemonicLogService = require('./mnemonic-log-service');
 const githubStorage = require('./github-storage');
+const imageGenerationManager = require('./image-generation-manager');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
@@ -62,14 +63,43 @@ class KidsVocabularyV2Service {
         console.log(`[KidsV2] No data for ${cleanWord}. Executing Fast Path.`);
 
         // A. Generate Basic Image (V1 Logic)
-        const v1Prompt = `cute cartoon illustration of ${cleanWord}, safe for kids, G-rated, simple vector art, vibrant colors, for primary school educational material, white background, high quality, no guns, no blood, no violence, no nudity`;
-        const seed = Math.floor(Math.random() * 1000000);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(v1Prompt)}?width=1024&height=1024&model=flux&seed=${seed}&nologo=true`;
+        // FORCE SAFE STYLE: Append strict keywords
+        const safetySuffix = ", cute kid-friendly style, soft colors, warm lighting, vector art, 3d render style, G-rated, masterpiece, best quality, no text, no scary elements";
+        const v1Prompt = `cute cartoon illustration of ${cleanWord}` + safetySuffix;
+
+        console.log(`[KidsV2] Fast Path: Generating for ${cleanWord}...`);
+
+        // Use Manager
+        let imageUrl = '';
+        try {
+            // Fallback to simple URL if manager fails or for speed, but let's try Manager for consistency.
+            // Since Fast Path needs to be FAST, Pollinations is perfect.
+            const imageResult = await imageGenerationManager.generateImage({
+                prompt: v1Prompt,
+                provider: 'pollinations',
+                userId: 'fast_path_v1',
+                options: {
+                    model: 'flux',
+                    seed: Math.floor(Math.random() * 1000000)
+                }
+            });
+
+            if (imageResult.success) {
+                imageUrl = imageResult.imageUrl;
+            } else {
+                console.error('[KidsV2] Fast Path Generation Failed:', imageResult.error);
+                // Fallback to error placeholder or empty
+                imageUrl = '';
+            }
+        } catch (e) {
+            console.error('[KidsV2] Fast Path Error:', e);
+            imageUrl = '';
+        }
 
         // B. Save to DB (Basic)
         const logId = await mnemonicLogService.createLog({
             word: cleanWord,
-            image_prompt: v1Prompt, // V1 prompt
+            image_prompt: v1Prompt,
             generated_image_url: imageUrl,
             analysis: null, // No analysis yet
             teaching: null,
@@ -119,30 +149,67 @@ class KidsVocabularyV2Service {
         }
 
         // 2. Generate Mnemonic Image (Painter)
-        const mnemonicPrompt = parsedResult.image_prompt;
-        const seed = Math.floor(Math.random() * 1000000);
-        const smartImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(mnemonicPrompt)}?width=1024&height=1024&model=flux&seed=${seed}&nologo=true`;
+        // Extract basic prompt from LLM result
+        // FIX: Handle case where AI doesn't return image_prompt or uses different casing
+        let corePrompt = parsedResult.image_prompt || parsedResult.imagePrompt || `A cute cartoon illustration explaining the word ${word}`;
 
-        // 3. Upload to GitHub
-        let finalImageUrl = smartImageUrl;
-        let githubUrl = null;
+        // FORCE SAFE STYLE: Append strict keywords to overrides any weird style from LLM
+        // This MUST match the specs in reporting_system_specs.md
+        const safetySuffix = ", cute kid-friendly style, soft colors, warm lighting, vector art, 3d render style, G-rated, masterpiece, best quality, no text, no scary elements";
+        const safePrompt = corePrompt + safetySuffix;
+
+        console.log(`[KidsV2] Generating Safe Image with prompt: ${safePrompt.substring(0, 50)}...`);
+
+        let finalImageUrl = null;
         let uploadStatus = 'painted';
+        let githubUrl = null;
 
         try {
-            console.log(`[KidsV2] Downloading image for GitHub upload...`);
-            const imageRes = await axios.get(smartImageUrl, { responseType: 'arraybuffer' });
-            const buffer = Buffer.from(imageRes.data, 'binary');
+            // Use Manager instead of manual URL
+            const imageResult = await imageGenerationManager.generateImage({
+                prompt: safePrompt,
+                provider: 'pollinations', // Default to free provider
+                userId: 'system_upgrade',
+                options: {
+                    model: 'flux',
+                    seed: Math.floor(Math.random() * 1000000)
+                }
+            });
 
-            // Upload using existing service (handles hashing: SHA256(word).jpg)
-            githubUrl = await githubStorage.uploadImage(word, buffer, 'jpg');
+            if (imageResult.success) {
+                finalImageUrl = imageResult.imageUrl; // Temporary URL
 
-            if (githubUrl) {
-                finalImageUrl = githubUrl;
-                uploadStatus = 'uploaded';
-                console.log(`[KidsV2] GitHub Upload Success: ${githubUrl}`);
+                // 3. Upload to GitHub
+                // We need to fetch the image buffer to upload to GitHub
+                // The manager gives us a URL, so we still need to fetch it.
+                // In the future, Manager could handle upload, but for now we do it here to keep Logic in Service.
+
+                try {
+                    console.log(`[KidsV2] Downloading image for GitHub upload...`);
+                    const imageRes = await axios.get(finalImageUrl, { responseType: 'arraybuffer' });
+                    const buffer = Buffer.from(imageRes.data, 'binary');
+
+                    // Upload using existing service (handles hashing: SHA256(word).jpg)
+                    githubUrl = await githubStorage.uploadImage(word, buffer, 'jpg');
+
+                    if (githubUrl) {
+                        finalImageUrl = githubUrl;
+                        uploadStatus = 'uploaded';
+                        console.log(`[KidsV2] GitHub Upload Success: ${githubUrl}`);
+                    }
+                } catch (uploadErr) {
+                    console.error('[KidsV2] GitHub Upload Failed:', uploadErr.message);
+                    // We still have the temporary URL, so we continue
+                }
+
+            } else {
+                console.error('[KidsV2] Image Generation Failed:', imageResult.error);
+                return; // Abort update if image failed
             }
+
         } catch (err) {
-            console.error('[KidsV2] GitHub Upload Failed:', err.message);
+            console.error('[KidsV2] Upgrade Error:', err);
+            return;
         }
 
         // 4. Update DB
@@ -150,7 +217,7 @@ class KidsVocabularyV2Service {
             await db.collection(this.collection).doc(logId).update({
                 analysis: parsedResult.analysis,
                 teaching: parsedResult.teaching,
-                image_prompt: mnemonicPrompt,
+                image_prompt: safePrompt, // Log the actual used prompt
 
                 generated_image_url: finalImageUrl,
                 github_url: githubUrl,

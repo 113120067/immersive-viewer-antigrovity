@@ -107,6 +107,18 @@ class ImageReportService {
                     data.reporters = []; // Reset reporters for the new version
                     data.last_banned_at = new Date().toISOString();
                     newVersion = data.version;
+
+                    // SYNC DELETE: Remove from 'mnemonic_generations' to force regeneration
+                    // We need to find the doc with this word.
+                    // Since we are in a transaction, we should be careful. 
+                    // But deleting from a different collection is fine.
+                    // Note: This relies on the 'word' field being consistent.
+                    // We can't do a query inside a transaction easily if not prepared.
+                    // Let's do it AFTER the transaction or use a separate operation.
+                    // BETTER: Return the ban signal and handle deletion outside, or just do a fire-and-forget delete here.
+                    // Since we have 'word', we can find it.
+                    // However, we are inside db.runTransaction. 
+                    // Let's just mark it for deletion in the return object or do a separate delete.
                 }
 
                 if (isNew) {
@@ -123,6 +135,56 @@ class ImageReportService {
                     newVersion: newVersion
                 };
             });
+
+            if (result.status === 'banned') {
+                console.log(`[Report] Word "${word}" banned. Starting Full Archive Process...`);
+
+                const snapshot = await db.collection('mnemonic_generations')
+                    .where('word', '==', word.trim().toLowerCase())
+                    .get();
+
+                if (!snapshot.empty) {
+                    const batch = db.batch();
+                    const archiveCollection = db.collection('mnemonic_generations_archive');
+                    const githubStorage = require('./github-storage'); // Lazy load to avoid circular dep if any
+
+                    for (const doc of snapshot.docs) {
+                        const data = doc.data();
+                        let archivedImageUrl = data.generated_image_url;
+
+                        // Move Image on GitHub if it exists
+                        if (data.github_url) {
+                            try {
+                                // Extract filename from URL or Hash
+                                // URL format: .../public/library/[hash].jpg
+                                const filename = data.github_url.split('/').pop();
+                                const newUrl = await githubStorage.moveImage(filename);
+                                if (newUrl) archivedImageUrl = newUrl;
+                            } catch (e) {
+                                console.error('[Report] Failed to move image file:', e);
+                            }
+                        }
+
+                        // Archive DB Record
+                        const archiveRef = archiveCollection.doc(doc.id);
+                        batch.set(archiveRef, {
+                            ...data,
+                            github_url: archivedImageUrl, // Update to archive URL
+                            archived_at: new Date().toISOString(),
+                            archive_reason: 'community_report_ban',
+                            final_votes: result.currentVotes
+                        });
+
+                        // Delete Main Record
+                        batch.delete(doc.ref);
+                    }
+
+                    await batch.commit();
+                    console.log(`[Report] Fully archived (DB + Image) and removed ${snapshot.size} entries for "${word}".`);
+                }
+            }
+
+            return result;
 
         } catch (error) {
             console.error('Report transaction failed:', error);

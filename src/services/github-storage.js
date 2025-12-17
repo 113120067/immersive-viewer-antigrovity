@@ -128,10 +128,57 @@ class GitHubStorageService {
         }
     }
 
-    getRawUrl(filename) {
-        // Return GitHub Pages URL
-        // Format: https://{owner}.github.io/{repo}/{path}/{filename}
-        return `https://${this.owner.toLowerCase()}.github.io/${this.repo}/${this.basePath}/${filename}`;
+    async getRawUrl(filename, folder = 'public/library') {
+        if (!this.octokit) return null;
+        return `https://raw.githubusercontent.com/${this.owner}/${this.repo}/main/${folder}/${filename}`;
+    }
+
+    /**
+     * Move an image to archive folder (Copy + Delete)
+     * @param {string} filename - The filename (e.g. hash.jpg)
+     * @param {string} sourceFolder - 'public/library'
+     * @param {string} targetFolder - 'public/library/archive'
+     */
+    async moveImage(filename, sourceFolder = 'public/library', targetFolder = 'public/library/archive') {
+        if (!this.octokit) return null;
+
+        try {
+            // 1. Get original content (SHA needed for delete, content needed for copy)
+            const sourcePath = `${sourceFolder}/${filename}`;
+            const { data: sourceFile } = await this.octokit.repos.getContent({
+                owner: this.owner,
+                repo: this.repo,
+                path: sourcePath,
+            });
+
+            // 2. Create in new location
+            const targetPath = `${targetFolder}/${filename}`;
+            await this.octokit.repos.createOrUpdateFileContents({
+                owner: this.owner,
+                repo: this.repo,
+                path: targetPath,
+                message: `Archive: Move ${filename} to archive`,
+                content: sourceFile.content, // base64 content
+                branch: 'main'
+            });
+
+            // 3. Delete from old location
+            await this.octokit.repos.deleteFile({
+                owner: this.owner,
+                repo: this.repo,
+                path: sourcePath,
+                message: `Archive: Remove ${filename} from active library`,
+                sha: sourceFile.sha,
+                branch: 'main'
+            });
+
+            console.log(`[GitHub] Moved ${filename} to ${targetFolder}`);
+            return `https://raw.githubusercontent.com/${this.owner}/${this.repo}/main/${targetPath}`;
+
+        } catch (error) {
+            console.error('[GitHub] Move failed:', error.message);
+            return null;
+        }
     }
 
     /**
