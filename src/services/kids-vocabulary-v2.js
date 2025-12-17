@@ -3,6 +3,7 @@ const llmService = require('./llm-service');
 const mnemonicLogService = require('./mnemonic-log-service');
 const githubStorage = require('./github-storage');
 const imageGenerationManager = require('./image-generation-manager');
+const ghostCleanupService = require('./ghost-cleanup-service');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
@@ -21,6 +22,8 @@ class KidsVocabularyV2Service {
             return 'You are an expert etymology teacher.';
         }
     }
+
+
 
     /**
      * Main Entry Point
@@ -42,21 +45,35 @@ class KidsVocabularyV2Service {
             const doc = snapshot.docs[0];
             const data = doc.data();
 
-            // Case A: Enhanced (Mnemonic Ready)
-            if (data.quality_tier === 'enhanced' || data.status === 'painted' || data.status === 'uploaded') {
+            // --- SELF-HEALING CHECK ---
+            // If record is 'planned' but older than TIMEOUT with no image, it's a GHOST.
+            // We should ignore it and let the system regenerate.
+            const isGhost = !data.generated_image_url &&
+                data.status === 'planned' &&
+                (new Date() - new Date(data.timestamp)) > ghostCleanupService.TIMEOUT_MS;
+
+            if (isGhost) {
+                console.warn(`[KidsV2] Ghost record detected for "${cleanWord}" (${doc.id}). ignoring and regenerating.`);
+                // Optionally: Trigger async cleanup for this specific ID
+                // ghostCleanupService.cleanupId(doc.id); // If we had this method
+            } else {
+                // Case A: Enhanced (Mnemonic Ready)
+                if (data.quality_tier === 'enhanced' || data.status === 'painted' || data.status === 'uploaded') {
+                    return {
+                        type: 'enhanced',
+                        data: data,
+                        logId: doc.id
+                    };
+                }
+
+                // Case B: Basic (Fast V1) exists
                 return {
-                    type: 'enhanced',
+                    type: 'basic',
                     data: data,
                     logId: doc.id
                 };
             }
-
-            // Case B: Basic (Fast V1) exists
-            return {
-                type: 'basic',
-                data: data,
-                logId: doc.id
-            };
+            // If ghost, we fall through to "No Data" logic below
         }
 
         // 2. Case C: No data -> FAST PATH
