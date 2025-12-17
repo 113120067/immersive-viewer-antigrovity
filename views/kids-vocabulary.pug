@@ -243,6 +243,13 @@ block content
                     small.text-muted.d-none.d-lg-block 開啟語音識別練習功能
               
               .col-12.col-lg-4
+                label.form-label.small(for="voiceSelect")
+                  | 🗣️ 選擇聲音 (Voice)
+                select#voiceSelect.form-select.form-select-sm
+                  option(value="" selected) 🤖 自動選擇 (Auto)
+                small.text-muted 支援英語語系
+              
+              .col-12.col-lg-4
                 label.form-label.small(for="speechSpeedSlider")
                   | 🎵 播放速度
                   span#speedValue.text-muted.ms-1 (正常)

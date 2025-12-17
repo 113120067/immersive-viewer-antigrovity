@@ -94,9 +94,13 @@ class KidsVocabularyGenerator {
       window.speechSynthesis.onvoiceschanged = () => {
         this.voices = window.speechSynthesis.getVoices();
         console.log(`🎤 語音包已載入: ${this.voices.length} 個語音可用`);
+        this.populateVoiceList();
       };
       // 嘗試立即獲取
       this.voices = window.speechSynthesis.getVoices();
+      if (this.voices.length > 0) {
+        this.populateVoiceList();
+      }
     }
 
     if ('webkitSpeechRecognition' in window) {
@@ -214,11 +218,22 @@ class KidsVocabularyGenerator {
       });
     }
 
-    const speechSpeedSlider = document.getElementById('speechSpeedSlider');
     if (speechSpeedSlider) {
       speechSpeedSlider.addEventListener('input', (e) => {
         localStorage.setItem('kidsSpeechSpeed', e.target.value);
         this.updateSpeedDisplay();
+      });
+    }
+
+    const voiceSelect = document.getElementById('voiceSelect');
+    if (voiceSelect) {
+      voiceSelect.addEventListener('change', (e) => {
+        localStorage.setItem('kidsVoiceURI', e.target.value);
+        console.log('🗣️ Voice selected:', e.target.value);
+        // Test play
+        if (this.currentWord) {
+          this.pronounceWord(this.currentWord);
+        }
       });
     }
 
@@ -702,6 +717,39 @@ class KidsVocabularyGenerator {
     this.updateSpeedDisplay();
   }
 
+  populateVoiceList() {
+    const voiceSelect = document.getElementById('voiceSelect');
+    if (!voiceSelect) return;
+
+    // Clear existing (except default auto)
+    voiceSelect.innerHTML = '<option value="">🤖 自動選擇 (Auto)</option>';
+
+    // Filter English voices
+    const englishVoices = this.voices.filter(v => v.lang.startsWith('en'));
+
+    // Sort: Google/Microsoft first
+    englishVoices.sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      if (aName.includes('google') || aName.includes('microsoft')) return -1;
+      if (bName.includes('google') || bName.includes('microsoft')) return 1;
+      return aName.localeCompare(bName);
+    });
+
+    const savedVoiceURI = localStorage.getItem('kidsVoiceURI');
+
+    englishVoices.forEach(voice => {
+      const option = document.createElement('option');
+      option.textContent = `${voice.name} (${voice.lang})`;
+      option.value = voice.voiceURI;
+
+      if (voice.voiceURI === savedVoiceURI) {
+        option.selected = true;
+      }
+      voiceSelect.appendChild(option);
+    });
+  }
+
   updateSpeedDisplay() {
     const slider = document.getElementById('speechSpeedSlider');
     const speedValue = document.getElementById('speedValue');
@@ -747,24 +795,38 @@ class KidsVocabularyGenerator {
     utterance.volume = 1.0; // 確保最大音量
 
     // 尋找最佳英語聲音
-    let englishVoice = null;
+    let selectedVoice = null;
+    const userVoiceURI = localStorage.getItem('kidsVoiceURI');
 
-    // 1. 優先找 Google US English (品質較好)
-    englishVoice = this.voices.find(v => v.name.includes('Google US English'));
-
-    // 2. 其次找任何包含 Female 的英語
-    if (!englishVoice) {
-      englishVoice = this.voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'));
+    // 1. User Choice
+    if (userVoiceURI) {
+      selectedVoice = this.voices.find(v => v.voiceURI === userVoiceURI);
     }
 
-    // 3. 最後找任何英語
-    if (!englishVoice) {
-      englishVoice = this.voices.find(v => v.lang.startsWith('en'));
+    // 2. Auto Detect (Improved) if no choice or choice missing
+    if (!selectedVoice) {
+      // Priority: Google US -> Microsoft Zira (Win Female) -> Samantha (Mac Female)
+      const voiceNamePriorities = ['Google US English', 'Microsoft Zira', 'Samantha'];
+
+      for (const name of voiceNamePriorities) {
+        selectedVoice = this.voices.find(v => v.name.includes(name));
+        if (selectedVoice) break;
+      }
+
+      // Fallback 1: Any "Female" English
+      if (!selectedVoice) {
+        selectedVoice = this.voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'));
+      }
+
+      // Fallback 2: Any English
+      if (!selectedVoice) {
+        selectedVoice = this.voices.find(v => v.lang.startsWith('en'));
+      }
     }
 
-    if (englishVoice) {
-      utterance.voice = englishVoice;
-      console.log(`🗣️ 使用語音: ${englishVoice.name}`);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      console.log(`🗣️ 使用語音: ${selectedVoice.name}`);
     } else {
       console.warn('⚠️ 找不到英語語音，使用預設語音');
     }
