@@ -161,8 +161,19 @@ block content
                       .spinner-border.spinner-border-sm.me-2#practiceSpinner(style="display: none")
                       span#practiceText.small 點擊麥克風開始練習...
               
-              .mb-0
-                small.text-muted#aiProvider POLLINATIONS.AI - V2 HYBRID
+              //- Result Footer (Provider + Report)
+              .result-footer.d-flex.justify-content-between.align-items-center.mt-2.px-2
+                 small.text-muted#aiProvider 
+                   i.fas.fa-robot.me-1
+                   | AI 生成
+                 
+                 button#reportImageBtn.btn.btn-link.text-danger.btn-sm.text-decoration-none.p-0(
+                   type="button" 
+                   style="display: none;"
+                   title="檢舉此圖片"
+                 )
+                   i.fas.fa-flag.me-1
+                   | 檢舉不當內容
 
               //- ✨ Magic Memory Card Components (Hidden by default)
               #magicCardSection.mt-3(style='display: none;')
@@ -398,7 +409,7 @@ block content
     /* 手機版全畫面樣式 (< 576px) */
     @media (max-width: 575.98px) {
       body {
-        font-size: 16px !important;
+        font-size: 16px !important; /* Prevent iOS zoom */
       }
       
       .card-header h3 {

@@ -604,18 +604,12 @@ class KidsVocabularyGenerator {
       else if (data.provider === 'backend') aiProviderElement.innerHTML = '<i class="fas fa-server"></i> 雲端生成';
       else aiProviderElement.innerHTML = '<i class="fas fa-robot"></i> AI 即時運算';
 
-      // Remove existing report button if any
-      const existingBtn = document.getElementById('reportImageBtn');
-      if (existingBtn) existingBtn.remove();
-
-      // Add Report Button
-      const reportBtn = document.createElement('button');
-      reportBtn.id = 'reportImageBtn';
-      reportBtn.className = 'btn btn-outline-danger btn-sm ms-2';
-      reportBtn.innerHTML = '<i class="fas fa-flag"></i> 檢舉';
-      reportBtn.title = '這張圖片不合適？點擊檢舉';
-      reportBtn.onclick = () => this.reportImage(input);
-      aiProviderElement.parentNode.appendChild(reportBtn);
+      // Show static Report Button
+      const reportBtn = document.getElementById('reportImageBtn');
+      if (reportBtn) {
+        reportBtn.style.display = 'block';
+        reportBtn.onclick = () => this.reportImage(input);
+      }
     }
 
     const filename = input.length > 20 ? input.substring(0, 20) + '...' : input;
