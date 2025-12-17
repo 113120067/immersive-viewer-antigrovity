@@ -1012,6 +1012,12 @@ block scripts
          
          if(!word) return;
 
+         // Mobile Audio Unlock (Critical for iOS/Android)
+         if ('speechSynthesis' in window) {
+             const emptyUtterance = new SpeechSynthesisUtterance('');
+             window.speechSynthesis.speak(emptyUtterance);
+         }
+
          // UI Reset
          imageResult.style.display = 'none';
          errorMessage.style.display = 'none';
@@ -1044,11 +1050,19 @@ block scripts
                          generateBtnDesktop.disabled = false;
                      }, 2000);
 
-                     // Mobile/Tablet: Scroll to Image Result (since it might be above the form)
+                     // Mobile/Tablet: Scroll to Image Result
                      if (window.innerWidth < 992) {
                          setTimeout(() => {
                              imageResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
                          }, 100);
+                     }
+
+                     // Auto Pronounce
+                     const autoPronounce = document.getElementById('pronunciationToggle').checked;
+                     if(autoPronounce && 'speechSynthesis' in window) {
+                         setTimeout(() => {
+                             speak(word);
+                         }, 500); // Slight delay for smoother UX
                      }
                  };
                  generatedImage.src = data.data.generated_image_url || data.image; // Fallback
@@ -1112,6 +1126,16 @@ block scripts
          }
       }
 
+      // TTS Function
+      function speak(text) {
+          if (!('speechSynthesis' in window)) return;
+          window.speechSynthesis.cancel(); // Stop current
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'en-US';
+          utterance.rate = parseFloat(document.getElementById('speechSpeedSlider').value) || 0.8;
+          window.speechSynthesis.speak(utterance);
+      }
+
       // Add To Recent Logic
       function addToRecent(word) {
           let recents = JSON.parse(localStorage.getItem('kids_recents') || '[]');
@@ -1148,6 +1172,15 @@ block scripts
 
       // Bind Events
       document.getElementById('simpleVocabForm').addEventListener('submit', handleGenerate);
+
+      // Pronounce Button
+      const pronounceBtn = document.getElementById('pronounceBtn');
+      if(pronounceBtn) {
+          pronounceBtn.addEventListener('click', () => {
+              const word = wordTitle.textContent;
+              if(word && word !== '單字') speak(word);
+          });
+      }
       
       // Chips
       document.querySelectorAll('.quick-chip').forEach(btn => {
